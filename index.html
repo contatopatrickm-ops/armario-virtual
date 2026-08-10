@@ -1199,16 +1199,11 @@ async function iniciarCheckoutStripe(){
 
     abrirCheckout();
 
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'apikey': SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json'
-      }
+    const { data: resultado, error } = await supabaseClient.functions.invoke('create-checkout-session', {
+      method: 'POST'
     });
-    const resultado = await resp.json();
-    if(!resp.ok) throw new Error(resultado.error || 'Erro ao iniciar pagamento');
+    if(error) throw error;
+    if(!resultado || !resultado.url) throw new Error(resultado?.error || 'Resposta inesperada ao iniciar pagamento');
 
     window.location.href = resultado.url; // redireciona pro checkout hospedado pelo Stripe
   }catch(e){
