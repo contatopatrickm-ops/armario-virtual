@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Armário Virtual — Patrick Muñoz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#171613;
+    --bg-elevated:#1E1C18;
+    --bg-card:#242220;
+    --accent:#BE9358;
+    --accent-dim:#8C6E42;
+    --accent-bright:#D6AD73;
+    --text-primary:#EFEAE0;
+    --text-secondary:#9A9184;
+    --text-tertiary:#6B6459;
+    --border:#38352E;
+    --season-verao:#C97B4A;
+    --season-inverno:#5C7A94;
+    --season-meia:#8A9873;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text-primary);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent-dim); color:var(--text-primary);}
+
+  /* ---------- NAV ---------- */
+  nav{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:28px 5vw;
+    border-bottom:1px solid var(--border);
+  }
+  .logo{
+    display:flex; flex-direction:column; line-height:1;
+  }
+  .logo-title{
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:20px;
+    letter-spacing:-0.01em; color:var(--text-primary);
+  }
+  .logo-title span{color:var(--accent);}
+  .logo-signature{
+    font-family:'Space Grotesk', sans-serif; font-weight:400; font-size:13px;
+    color:var(--text-secondary); margin-top:2px;
+  }
+  .nav-right{display:flex; align-items:center; gap:28px;}
+  .nav-link{
+    color:var(--text-secondary); font-size:14px; text-decoration:none; transition:color .2s;
+    background:transparent; border:none; cursor:pointer; font-family:'Inter', sans-serif;
+  }
+  .nav-link:hover{color:var(--text-primary);}
+  .btn-entrar{
+    border:1px solid var(--accent-dim); color:var(--accent-bright); background:transparent;
+    padding:9px 20px; border-radius:2px; font-size:13px; letter-spacing:0.03em;
+    text-decoration:none; transition:all .2s; font-family:'JetBrains Mono', monospace; cursor:pointer;
+  }
+  .btn-entrar:hover{background:var(--accent-dim); color:var(--bg);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:100px 5vw 70px; max-width:900px;
+    border-bottom:1px solid var(--border);
+  }
+  .hero-eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.15em;
+    color:var(--accent); text-transform:uppercase; margin-bottom:22px; display:block;
+  }
+  .hero h1{
+    font-family:'Fraunces', serif; font-weight:400; font-size:clamp(36px, 5.2vw, 68px);
+    line-height:1.08; letter-spacing:-0.01em; max-width:820px;
+  }
+  .hero h1 em{color:var(--accent-bright); font-style:italic; font-weight:300;}
+  .hero p{
+    margin-top:26px; color:var(--text-secondary); font-size:17px; max-width:520px; line-height:1.6;
+  }
+  .hero-stats{
+    display:flex; gap:44px; margin-top:48px; flex-wrap:wrap;
+  }
+  .stat-num{font-family:'Fraunces', serif; font-size:32px; color:var(--accent-bright);}
+  .stat-label{font-size:12px; color:var(--text-tertiary); font-family:'JetBrains Mono', monospace; letter-spacing:0.04em; margin-top:4px;}
+
+  /* ---------- LANDING: PRÉVIA DE FOTOS + NOTA DO CTA ---------- */
+  .landing-previa-titulo{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--text-tertiary); margin:36px 0 14px;
+  }
+  .landing-previa-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;
+  }
+  .landing-previa-grid .previa-item{
+    aspect-ratio:3/4; border-radius:9px; overflow:hidden; border:1px solid var(--border);
+    background:var(--bg-card);
+  }
+  .landing-previa-grid .previa-item img{
+    width:100%; height:100%; object-fit:cover; display:block; filter:brightness(0.9);
+  }
+  .landing-cta-nota{
+    margin-top:10px; font-size:12px; color:var(--text-tertiary); font-family:'JetBrains Mono', monospace;
+  }
+  @media (max-width:520px){
+    .landing-previa-grid{grid-template-columns:repeat(3, 1fr); gap:8px;}
+  }
+
+  /* ---------- FILTER BAR ---------- */
+  .filter-bar{
+    z-index:40;
+    background:var(--bg-elevated); border-bottom:1px solid var(--border);
+    padding:22px 5vw; display:flex; gap:36px; flex-wrap:wrap; align-items:flex-start;
+  }
+  .filter-group{display:flex; flex-direction:column; gap:9px; min-width:160px;}
+  .filter-label{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.1em;
+    color:var(--text-tertiary); text-transform:uppercase;
+  }
+  .chip-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .chip{
+    border:1px solid var(--border); background:transparent; color:var(--text-secondary);
+    padding:6px 13px; border-radius:20px; font-size:13px; cursor:pointer;
+    transition:all .15s; font-family:'Inter', sans-serif;
+  }
+  .chip:hover{border-color:var(--accent-dim); color:var(--text-primary);}
+  .chip.active{background:var(--accent); border-color:var(--accent); color:var(--bg); font-weight:500;}
+
+  .range-wrap{display:flex; flex-direction:column; gap:6px; width:220px;}
+  .range-wrap input[type=range]{
+    -webkit-appearance:none; width:100%; height:2px; background:var(--border); outline:none;
+  }
+  .range-wrap input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:13px; height:13px; border-radius:50%;
+    background:var(--accent-bright); cursor:pointer; border:2px solid var(--bg);
+  }
+  .range-value{font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--accent-bright);}
+
+  .btn-clear{
+    align-self:flex-end; margin-left:auto;
+    background:transparent; border:none; color:var(--text-tertiary);
+    font-size:13px; cursor:pointer; text-decoration:underline; text-underline-offset:3px;
+    font-family:'Inter', sans-serif; padding-top:22px;
+  }
+  .btn-clear:hover{color:var(--accent-bright);}
+
+  .results-count{
+    padding:20px 5vw 0; color:var(--text-tertiary); font-size:13px;
+    font-family:'JetBrains Mono', monospace;
+  }
+  .results-count b{color:var(--accent-bright); font-weight:500;}
+
+  /* ---------- GRID ---------- */
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+    gap:28px; padding:28px 5vw 100px;
+  }
+  .card{
+    background:var(--bg-card); border:1px solid var(--border); border-radius:3px;
+    overflow:hidden; position:relative; transition:transform .25s, border-color .25s;
+    cursor:pointer;
+  }
+  .card:hover{transform:translateY(-4px); border-color:var(--accent-dim);}
+  .card-art{
+    aspect-ratio:3/4; position:relative; display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .card-art svg{width:52%; height:52%; position:relative; z-index:2;}
+  .card-art::after{
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(circle at 30% 20%, rgba(255,255,255,0.06), transparent 60%);
+  }
+
+  /* hanging garment tag */
+  .tag{
+    position:absolute; top:14px; right:14px; z-index:3;
+    background:var(--bg-elevated); border:1px solid var(--accent-dim);
+    padding:6px 9px 7px; border-radius:2px; text-align:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.35);
+  }
+  .tag::before{
+    content:''; position:absolute; top:-5px; left:50%; transform:translateX(-50%);
+    width:6px; height:6px; border-radius:50%; background:var(--bg); border:1px solid var(--accent-dim);
+  }
+  .tag-formality{font-family:'Fraunces', serif; font-size:15px; color:var(--accent-bright); line-height:1;}
+  .tag-temp{font-family:'JetBrains Mono', monospace; font-size:9px; color:var(--text-tertiary); margin-top:3px; letter-spacing:0.02em;}
+
+  .card-body{padding:16px 16px 18px;}
+  .card-title{font-family:'Fraunces', serif; font-size:17px; font-weight:500; margin-bottom:8px;}
+  .card-meta{display:flex; gap:6px; flex-wrap:wrap;}
+  .meta-pill{
+    font-size:10px; font-family:'JetBrains Mono', monospace; letter-spacing:0.03em;
+    color:var(--text-tertiary); border:1px solid var(--border); padding:3px 8px; border-radius:12px;
+    text-transform:uppercase;
+  }
+
+  .empty-state{
+    padding:100px 5vw; text-align:center; color:var(--text-tertiary);
+  }
+  .empty-state h3{font-family:'Fraunces', serif; font-size:24px; color:var(--text-secondary); margin-bottom:10px; font-weight:400;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--border); padding:50px 5vw; text-align:center;
+    color:var(--text-tertiary); font-size:13px;
+  }
+  footer .foot-note{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.05em;
+    color:var(--accent-dim); margin-bottom:8px; text-transform:uppercase;
+  }
+
+  @media (max-width:640px){
+    .filter-bar{flex-direction:column; gap:20px;}
+    .range-wrap{width:100%;}
+    .btn-clear{margin-left:0; align-self:flex-start; padding-top:0;}
+  }
+
+  /* ---------- MODAL: ADICIONAR LOOK ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(10,9,7,0.78); backdrop-filter:blur(4px);
+    z-index:100; display:none; align-items:flex-start; justify-content:center;
+    overflow-y:auto; padding:60px 20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--bg-elevated); border:1px solid var(--border); border-radius:4px;
+    max-width:560px; width:100%; padding:36px; position:relative;
+  }
+  .modal h2{font-family:'Fraunces', serif; font-weight:500; font-size:24px; margin-bottom:6px;}
+  .modal-sub{color:var(--text-tertiary); font-size:13px; margin-bottom:28px; line-height:1.5;}
+  .form-field{margin-bottom:20px;}
+  .form-field label{
+    display:block; font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.08em;
+    color:var(--text-tertiary); text-transform:uppercase; margin-bottom:8px;
+  }
+  .form-field input[type=text], .form-field select{
+    width:100%; background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary);
+    padding:10px 12px; border-radius:2px; font-family:'Inter', sans-serif; font-size:14px;
+  }
+  .form-field input[type=file]{width:100%; color:var(--text-secondary); font-size:13px;}
+  .checkbox-grid{display:flex; flex-wrap:wrap; gap:8px;}
+  .checkbox-pill{
+    border:1px solid var(--border); border-radius:16px; padding:6px 12px; font-size:12px;
+    cursor:pointer; color:var(--text-secondary); transition:all .15s; user-select:none;
+  }
+  .checkbox-pill:hover{border-color:var(--accent-dim); color:var(--text-primary);}
+  .checkbox-pill.checked{background:var(--accent); border-color:var(--accent); color:var(--bg); font-weight:500;}
+  .img-preview{
+    width:140px; aspect-ratio:3/4; border-radius:3px; overflow:hidden; background:var(--bg-card);
+    border:1px solid var(--border); margin-top:10px; display:none;
+  }
+  .img-preview img{width:100%; height:100%; object-fit:cover;}
+  .modal-actions{display:flex; gap:12px; margin-top:8px; justify-content:flex-end;}
+  .btn-primary{
+    background:var(--accent); color:var(--bg); border:none; padding:11px 22px; border-radius:2px;
+    font-weight:500; cursor:pointer; font-family:'Inter', sans-serif; font-size:14px; transition:background .15s;
+  }
+  .btn-primary:hover{background:var(--accent-bright);}
+  .btn-secondary{
+    background:transparent; color:var(--text-secondary); border:1px solid var(--border); padding:11px 22px;
+    border-radius:2px; cursor:pointer; font-family:'Inter', sans-serif; font-size:14px;
+  }
+  .btn-secondary:hover{color:var(--text-primary); border-color:var(--accent-dim);}
+
+  /* ---------- MODAL DE LOGIN/CADASTRO ---------- */
+  .auth-divider{
+    display:flex; align-items:center; gap:12px; margin:22px 0; color:var(--text-tertiary); font-size:12px;
+  }
+  .auth-divider::before, .auth-divider::after{content:''; flex:1; height:1px; background:var(--border);}
+  .auth-cadastro-titulo{
+    font-family:'Fraunces', serif; font-size:16px; color:var(--text-primary); margin-bottom:4px; text-align:center;
+  }
+  .auth-cadastro-sub{
+    font-size:12px; color:var(--text-tertiary); margin-bottom:14px; text-align:center; line-height:1.5;
+  }
+  #authAlternar{color:var(--accent-bright); border-color:var(--accent-dim); font-weight:500;}
+  #authAlternar:hover{background:var(--accent-dim); color:var(--bg);}
+  .saved-list{margin-top:30px; border-top:1px solid var(--border); padding-top:20px;}
+  .saved-list-title{
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-tertiary);
+    margin-bottom:12px; text-transform:uppercase; letter-spacing:0.06em;
+  }
+  .saved-item{display:flex; align-items:center; gap:10px; padding:7px 0; font-size:13px; color:var(--text-secondary);}
+  .saved-item img{width:30px; height:38px; object-fit:cover; border-radius:2px; border:1px solid var(--border);}
+  .saved-item .del{margin-left:auto; color:var(--text-tertiary); cursor:pointer; font-size:12px; text-decoration:underline; text-underline-offset:2px;}
+  .saved-item .del:hover{color:var(--accent-bright);}
+  .btn-add-look{
+    background:transparent; border:1px solid var(--border); color:var(--text-tertiary);
+    padding:9px 18px; border-radius:2px; font-size:12px; cursor:pointer;
+    font-family:'JetBrains Mono', monospace; letter-spacing:0.03em; transition:all .2s;
+  }
+  .btn-add-look:hover{border-color:var(--accent-dim); color:var(--accent-bright);}
+
+  /* ---------- LIGHTBOX: FOTO EM TAMANHO COMPLETO ---------- */
+  .lightbox-overlay{
+    position:fixed; inset:0; background:rgba(8,7,6,0.92); backdrop-filter:blur(6px);
+    z-index:110; display:none; align-items:center; justify-content:center;
+    padding:40px 20px; flex-direction:column;
+  }
+  .lightbox-overlay.open{display:flex;}
+  .lightbox-close{
+    position:absolute; top:24px; right:5vw; background:transparent; border:1px solid var(--border);
+    color:var(--text-secondary); width:38px; height:38px; border-radius:50%; cursor:pointer;
+    font-size:18px; line-height:1; transition:all .2s;
+  }
+  .lightbox-close:hover{color:var(--text-primary); border-color:var(--accent-dim);}
+  .lightbox-content{
+    display:flex; flex-direction:column; align-items:center; gap:20px; max-width:90vw; max-height:90vh;
+  }
+  .lightbox-content img{
+    max-width:min(560px, 86vw); max-height:70vh; width:auto; height:auto;
+    object-fit:contain; border:1px solid var(--border); border-radius:3px;
+    background:var(--bg-card);
+  }
+  .lightbox-placeholder{
+    width:min(420px, 80vw); aspect-ratio:3/4; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border); border-radius:3px;
+  }
+  .lightbox-placeholder svg{width:40%; height:40%;}
+  .lightbox-info{text-align:center;}
+  .lightbox-title{font-family:'Fraunces', serif; font-size:24px; font-weight:500; margin-bottom:10px;}
+  .lightbox-meta{display:flex; gap:6px; flex-wrap:wrap; justify-content:center;}
+
+  /* ---------- CHECKOUT (simulação de pagamento) ---------- */
+  .checkout-overlay{
+    position:fixed; inset:0; background:rgba(8,7,6,0.88); backdrop-filter:blur(6px);
+    z-index:120; display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .checkout-overlay.open{display:flex;}
+  .checkout-card{
+    background:var(--bg-elevated); border:1px solid var(--accent-dim); border-radius:4px;
+    padding:44px 40px; max-width:400px; width:100%; position:relative; text-align:center;
+  }
+  .checkout-close{
+    position:absolute; top:16px; right:16px; background:transparent; border:1px solid var(--border);
+    color:var(--text-secondary); width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:16px;
+  }
+  .checkout-close:hover{color:var(--text-primary); border-color:var(--accent-dim);}
+  .checkout-eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.12em;
+    color:var(--accent); text-transform:uppercase; margin-bottom:14px;
+  }
+  .checkout-card h2{font-family:'Fraunces', serif; font-weight:500; font-size:24px; margin-bottom:18px; line-height:1.25;}
+  .checkout-price{font-family:'Fraunces', serif; font-size:40px; color:var(--accent-bright); margin-bottom:24px;}
+  .checkout-price span{font-size:15px; color:var(--text-tertiary); font-family:'Inter', sans-serif;}
+  .checkout-features{list-style:none; text-align:left; margin-bottom:28px;}
+  .checkout-features li{
+    color:var(--text-secondary); font-size:14px; padding:8px 0 8px 20px;
+    border-bottom:1px solid var(--border); position:relative;
+  }
+  .checkout-features li::before{content:'—'; position:absolute; left:0; color:var(--accent);}
+  .checkout-note{color:var(--text-tertiary); font-size:11px; margin-top:16px; line-height:1.5;}
+  .checkout-success{display:none; flex-direction:column; align-items:center; gap:10px;}
+  .checkout-success.show{display:flex;}
+
+  /* ---------- BLOQUEIO DA GRID ATÉ O PAGAMENTO ---------- */
+  .catalog-wrapper{position:relative;}
+  .grid.locked{filter:blur(11px); pointer-events:none; user-select:none;}
+  .grid-lock-overlay{
+    position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    padding:20px; z-index:10;
+  }
+  .grid-lock-overlay.show{display:flex;}
+  .lock-card{
+    background:var(--bg-elevated); border:1px solid var(--accent-dim); border-radius:4px;
+    padding:36px 40px; text-align:center; max-width:360px; box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  }
+  .lock-card h3{font-family:'Fraunces', serif; font-size:21px; font-weight:500; margin-bottom:10px;}
+  .lock-card p{color:var(--text-secondary); font-size:13px; margin-bottom:20px; line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="lightbox-overlay" id="lightboxOverlay">
+  <button class="lightbox-close" id="lightboxClose" type="button">&times;</button>
+  <div class="lightbox-content" id="lightboxContent"></div>
+</div>
+
+<div class="modal-overlay" id="sobreOverlay">
+  <div class="modal" style="max-width:560px;">
+    <button class="checkout-close" id="sobreClose" type="button" style="position:absolute; top:24px; right:24px;">&times;</button>
+
+    <div class="hero-eyebrow" style="margin-bottom:14px;">Sobre o serviço</div>
+    <h2 style="font-size:28px; margin-bottom:20px;">Um closet inteiro, resolvido em segundos.</h2>
+
+    <p style="color:var(--text-secondary); font-size:15px; line-height:1.7; margin-bottom:20px;">
+      O Armário Virtual é um catálogo de looks masculinos criado por Patrick Muñoz, consultor de imagem
+      especializado em estilo masculino. Cada composição é montada e revisada por ele — não é uma seleção
+      gerada por algoritmo, é curadoria de verdade, pensada pra funcionar na vida real.
+    </p>
+
+    <p style="color:var(--text-secondary); font-size:15px; line-height:1.7; margin-bottom:20px;">
+      A ideia nasceu de um problema comum: mesmo com o guarda-roupa cheio, é fácil ficar minutos parado
+      sem saber o que vestir. O Armário Virtual resolve isso — você escolhe a ocasião, a estação, se está
+      calor, ameno ou frio, e se o compromisso é de dia ou de noite, e recebe looks prontos, já pensados
+      pra aquele contexto.
+    </p>
+
+    <div class="saved-list-title" style="margin-top:28px;">Como funciona</div>
+    <ul class="checkout-features" style="margin-top:12px;">
+      <li>Acesso ao catálogo completo, com dezenas de looks organizados por categoria</li>
+      <li>Filtros combináveis: ocasião, estação, temperatura e período do dia</li>
+      <li>Novos looks são adicionados periodicamente, sem custo extra</li>
+      <li>Pagamento único — sem mensalidade, sem taxa recorrente</li>
+    </ul>
+
+    <p style="color:var(--text-tertiary); font-size:13px; line-height:1.6; margin-top:24px;">
+      Este é um protótipo em construção. As fotos que você vê hoje são placeholders — o catálogo final
+      terá fotos reais de cada look, fotografadas e selecionadas pelo Patrick.
+    </p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="lojasOverlay">
+  <div class="modal" style="max-width:520px;">
+    <button class="checkout-close" id="lojasClose" type="button" style="position:absolute; top:24px; right:24px;">&times;</button>
+
+    <div class="hero-eyebrow" style="margin-bottom:14px;">Onde comprar</div>
+    <h2 style="font-size:26px; margin-bottom:16px;">Lojas que eu indico</h2>
+
+    <p style="color:var(--text-secondary); font-size:15px; line-height:1.7; margin-bottom:24px;">
+      Nessas lojas você encontra o tipo de peça que aparece nos looks daqui do catálogo — do básico
+      ao mais elaborado. Algumas têm cupom de desconto pra quem vem do Armário Virtual.
+    </p>
+
+    <ul class="checkout-features" style="margin-top:0;">
+      <li>Foxton</li>
+      <li>Zara</li>
+      <li>Renner</li>
+      <li>C&amp;A</li>
+      <li>Aviator</li>
+      <li>Tailors Mind <span class="meta-pill" style="margin-left:6px;">cupom PATRICK</span></li>
+      <li>Reserva</li>
+      <li>Oficina</li>
+      <li>Brooksfield</li>
+      <li>Dochtos <span class="meta-pill" style="margin-left:6px;">cupom PATRICK15</span></li>
+      <li>Reise <span class="meta-pill" style="margin-left:6px;">cupom PATRICK10</span></li>
+      <li>Richards</li>
+    </ul>
+  </div>
+</div>
+
+<div class="modal-overlay" id="authOverlay">
+  <div class="modal" style="max-width:380px;">
+    <h2 id="authTitulo">Entrar</h2>
+    <div class="modal-sub" id="authSubtitulo">Já tem uma conta? Entre com seu e-mail e senha.</div>
+
+    <div class="form-field">
+      <label>E-mail</label>
+      <input type="email" id="authEmail" placeholder="voce@email.com">
+    </div>
+    <div class="form-field">
+      <label>Senha</label>
+      <input type="password" id="authSenha" placeholder="••••••••">
+    </div>
+
+    <div id="authErro" style="color:#C97B4A; font-size:12px; margin-bottom:14px; display:none;"></div>
+
+    <button class="btn-primary" id="btnAuthSubmit" type="button" style="width:100%;">Entrar</button>
+
+    <div class="auth-divider"><span>ou</span></div>
+
+    <div id="authCadastroBloco">
+      <div class="auth-cadastro-titulo">Primeira vez por aqui?</div>
+      <div class="auth-cadastro-sub">Crie sua conta em segundos pra ter acesso ao catálogo.</div>
+      <button class="btn-secondary" id="authAlternar" type="button" style="width:100%;">Criar minha conta</button>
+    </div>
+
+    <div id="authLoginBloco" style="display:none; text-align:center;">
+      <button class="btn-secondary" id="authAlternarVolta" type="button" style="width:100%;">Já tenho conta — quero entrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="senhaOverlay">
+  <div class="modal" style="max-width:340px;">
+    <h2>Área restrita</h2>
+    <div class="modal-sub">Digite a senha de administrador para adicionar looks.</div>
+    <div class="form-field">
+      <label>Senha</label>
+      <input type="password" id="inputSenha" placeholder="••••••••">
+    </div>
+    <div id="senhaErro" style="color:#C97B4A; font-size:12px; margin-bottom:14px; display:none;">Senha incorreta. Tente novamente.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="btnCancelarSenha" type="button">Cancelar</button>
+      <button class="btn-primary" id="btnConfirmarSenha" type="button">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="checkout-overlay" id="checkoutOverlay">
+  <div class="checkout-card" style="text-align:center;">
+    <div class="checkout-eyebrow">Armário Virtual</div>
+    <h2>Redirecionando para o pagamento seguro...</h2>
+    <p style="color:var(--text-secondary); font-size:14px;">Você será levado à tela de pagamento do Stripe.</p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>Adicionar look</h2>
+    <div class="modal-sub">A foto e as tags ficam salvas automaticamente neste site — só você vê e edita essa lista.</div>
+
+    <div class="form-field">
+      <label>Foto do look</label>
+      <input type="file" id="inputFoto" accept="image/*">
+      <div class="img-preview" id="imgPreview"><img id="imgPreviewImg" alt=""></div>
+    </div>
+
+    <div class="form-field">
+      <label>Título</label>
+      <input type="text" id="inputTitulo" placeholder="Ex: Blazer estruturado + camisa branca">
+    </div>
+
+    <div class="form-field">
+      <label>Ocasiões (pode marcar mais de uma)</label>
+      <div class="checkbox-grid" id="checkOcasioes"></div>
+    </div>
+
+    <div class="form-field">
+      <label>Estação (pode marcar mais de uma)</label>
+      <div class="checkbox-grid" id="checkEstacao"></div>
+    </div>
+
+    <div class="form-field">
+      <label>Temperatura (pode marcar mais de uma)</label>
+      <div class="checkbox-grid" id="checkTemperatura"></div>
+    </div>
+
+    <div class="form-field">
+      <label>Período (pode marcar mais de um)</label>
+      <div class="checkbox-grid" id="checkPeriodo"></div>
+    </div>
+
+    <div class="form-field">
+      <label>Página inicial</label>
+      <div class="checkbox-grid">
+        <div class="checkbox-pill" data-group="destaque" data-value="sim" id="pillDestaque">★ Destacar na página inicial (prévia pública)</div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" id="btnCancelar" type="button">Cancelar</button>
+      <button class="btn-primary" id="btnSalvar" type="button">Salvar look</button>
+    </div>
+    <div id="formErro" style="color:#C97B4A; font-size:12px; margin-top:12px; display:none;"></div>
+
+    <div class="saved-list" id="savedList"></div>
+  </div>
+</div>
+
+<div id="landingPage">
+  <nav>
+    <div class="logo">
+      <div class="logo-title">Armário <span>Virtual</span></div>
+      <div class="logo-signature">por Patrick Muñoz</div>
+    </div>
+    <div class="nav-right">
+      <button class="btn-add-look" id="btnAdminLanding" type="button">admin</button>
+      <button class="btn-entrar" id="btnEntrarLanding" type="button">Entrar</button>
+    </div>
+  </nav>
+
+  <section class="hero" style="border-bottom:none;">
+    <span class="hero-eyebrow">Armário Virtual · por patrick muñoz</span>
+    <h1>Nunca mais fique sem saber <em>o que vestir</em>.</h1>
+    <p>Um catálogo com dezenas de looks masculinos prontos, filtráveis por ocasião, estação, temperatura e período — pra você resolver o look em segundos, não em 20 minutos de indecisão na frente do guarda-roupa.</p>
+  </section>
+
+  <section style="padding:0 5vw 10px; max-width:820px;">
+    <div class="landing-previa-titulo">Alguns looks de dentro do catálogo</div>
+    <div class="landing-previa-grid" id="landingPreviaGrid"></div>
+  </section>
+
+  <section style="padding:10px 5vw 90px; max-width:640px;">
+    <ul class="checkout-features" style="border:none; margin-bottom:32px;">
+      <li>Um look pronto pra cada ocasião — trabalho, encontro, jantar, viagem</li>
+      <li>Filtros por ocasião, estação, temperatura e período</li>
+      <li>Curadoria feita por um consultor de imagem, não um algoritmo genérico</li>
+      <li>Pague uma vez, use pra sempre — acesso vitalício</li>
+    </ul>
+    <button class="btn-primary" id="btnEntrarHero" type="button">Quero ter acesso — R$ 19,90</button>
+    <div class="landing-cta-nota">Pagamento único · acesso vitalício — sem mensalidade</div>
+  </section>
+
+  <footer>
+    <div class="foot-note">Armário Virtual</div>
+    <div>Acesso vitalício, pagamento único.</div>
+  </footer>
+</div>
+
+<div id="catalogPage" style="display:none;">
+<nav>
+  <div class="logo">
+    <div class="logo-title">Armário <span>Virtual</span></div>
+    <div class="logo-signature">por Patrick Muñoz</div>
+  </div>
+  <div class="nav-right">
+    <button class="nav-link" id="btnSobre" type="button">Sobre</button>
+    <button class="nav-link" id="btnLojas" type="button">Lojas que eu indico</button>
+    <button class="btn-add-look" id="btnAbrirModal" type="button">+ Adicionar look</button>
+    <button class="nav-link" id="btnSair" type="button">Sair</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <span class="hero-eyebrow">Catálogo de looks · por patrick muñoz</span>
+  <h1>O look certo para cada <em>ocasião</em>, ambiente e temperatura.</h1>
+  <p>Filtre entre dezenas de composições masculinas prontas. Seja por evento, faixa de temperatura, dia ou noite, e nunca mais fique na dúvida na frente do guarda-roupa.</p>
+  <div class="hero-stats">
+    <div><div class="stat-num" id="totalLooks">102+</div><div class="stat-label">LOOKS CATALOGADOS</div></div>
+    <div><div class="stat-num">11</div><div class="stat-label">OCASIÕES</div></div>
+    <div><div class="stat-num">5</div><div class="stat-label">NÍVEIS DE FORMALIDADE</div></div>
+  </div>
+</section>
+
+<div class="filter-bar">
+  <div class="filter-group">
+    <span class="filter-label">Ocasião</span>
+    <div class="chip-row" id="ocasiaoChips"></div>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Estação</span>
+    <div class="chip-row" id="estacaoChips"></div>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Temperatura</span>
+    <div class="chip-row" id="temperaturaChips"></div>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Período</span>
+    <div class="chip-row" id="periodoChips"></div>
+  </div>
+  <button class="btn-clear" id="clearBtn">Limpar filtros</button>
+</div>
+
+<div class="results-count"><b id="countNum">0</b> looks encontrados</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  <div class="foot-note">Armário Virtual</div>
+  <div>Criado e desenvolvido por Patrick Muñoz.</div>
+</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://wouoaeagcelzlqrctila.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdW9hZWFnY2VsemxxcmN0aWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNjYyOTYsImV4cCI6MjEwMTg0MjI5Nn0.XGcJB70GOlm2EYgRk7tX9aMsm6fwyIcKp8lQr_yIWXc';
+let supabaseClient = null;
+function formatarErro(e){
+  if(!e) return 'erro desconhecido';
+  if(typeof e === 'string') return e;
+  if(e.message) return `${e.message}${e.details ? ' — ' + e.details : ''}${e.hint ? ' (dica: ' + e.hint + ')' : ''}`;
+  try{ return JSON.stringify(e); }catch(_){ return String(e); }
+}
+try{
+  if(typeof supabase !== 'undefined'){
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } else {
+    console.error('A biblioteca do Supabase não carregou (provável bloqueio de script externo neste ambiente de preview).');
+  }
+}catch(e){
+  console.error('Erro ao iniciar o cliente do Supabase:', formatarErro(e));
+}
+
+const OCASIOES = ['Trabalho','Encontro','Casamento','Casual','Evento social','Viagem','Praia','Almoço','Jantar','Cinema','Shopping'];
+const TEMPERATURAS = ['Calor','Ameno','Frio'];
+const PERIODOS = ['Dia','Noite'];
+const ESTACOES = [
+  {id:'verao', label:'Verão', color:'var(--season-verao)'},
+  {id:'inverno', label:'Inverno', color:'var(--season-inverno)'},
+  {id:'meia', label:'Meia-estação', color:'var(--season-meia)'}
+];
+const FORMALIDADE_LABELS = {1:'I — despojado',2:'II — casual', 3:'III — smart casual', 4:'IV — formal', 5:'V — cerimônia'};
+
+// ---- geração de dataset de exemplo (placeholder até termos fotos reais) ----
+const NOMES = ['Alfaiataria em linho','Blazer estruturado','Camisa + chino','Casual de fim de semana',
+  'Terno cinza-chumbo','Combinação monocromática','Look para trilha urbana','Traje de cerimônia',
+  'Camisa social + jeans escuro','Suéter + calça de sarja','Jaqueta de couro leve','Conjunto em tons terrosos',
+  'Blazer sem gravata','Look de viagem confortável','Traje black tie','Camisa linho + bermuda',
+  'Moletom premium + calça reta','Casaco longo de inverno','Polo + calça alfaiataria','Trench coat clássico'];
+
+function gerarLooks(qtd, looksReais){
+  looksReais = looksReais || [];
+  const looks = [];
+  for(let i=0;i<qtd;i++){
+    // geração determinística (baseada no índice, não em Math.random) para que
+    // a grid não "embaralhe" toda vez que um look real é adicionado
+    const formalidade = (i % 5) + 1;
+    const estacoes = [ESTACOES[i % ESTACOES.length]];
+    const tempMax = estacoes[0].id==='verao' ? 24 + (i % 11) :
+                     estacoes[0].id==='inverno' ? 10 + (i % 10) :
+                     18 + (i % 8);
+    const ocasioesShuffled = [OCASIOES[i % OCASIOES.length], OCASIOES[(i+4) % OCASIOES.length]];
+    const temperaturas = [TEMPERATURAS[i % TEMPERATURAS.length]];
+    const periodos = [PERIODOS[(i+1) % PERIODOS.length]];
+    looks.push({
+      id:i,
+      titulo: NOMES[i % NOMES.length] + (i>=NOMES.length ? ' '+(Math.floor(i/NOMES.length)+1) : ''),
+      imagem: null,
+      ocasioes: ocasioesShuffled,
+      estacoes,
+      formalidade,
+      tempMax,
+      temperaturas,
+      periodos
+    });
+  }
+
+  // mescla os looks reais salvos (via formulário "+ Adicionar look") no lugar
+  // dos primeiros placeholders; se houver mais looks reais que placeholders,
+  // eles são acrescentados ao final da lista
+  looksReais.forEach((real, idx)=>{
+    // compatibilidade com looks salvos antes das mudanças para multi-seleção
+    const temperaturas = real.temperaturas || (real.temperatura ? [real.temperatura] : []);
+    const periodos = real.periodos || (real.periodo ? [real.periodo] : []);
+    let estacoesIds = real.estacoes || (real.estacao ? [real.estacao] : []);
+    const estacoesObjs = estacoesIds.map(id=>ESTACOES.find(e=>e.id===id)).filter(Boolean);
+    const item = {
+      id: 'real-'+idx,
+      titulo: real.titulo,
+      imagem: real.imagem,
+      ocasioes: real.ocasioes || [],
+      estacoes: estacoesObjs.length ? estacoesObjs : [ESTACOES[0]],
+      formalidade: real.formalidade || 3,
+      tempMax: temperaturas.includes('Calor') ? 30 : 15,
+      temperaturas,
+      periodos
+    };
+    if(idx < looks.length){ looks[idx] = item; } else { looks.push(item); }
+  });
+
+  return looks;
+}
+
+let LOOKS = [];
+let looksReaisSalvos = [];
+
+// ---- ícone SVG minimalista de traje, varia levemente com formalidade ----
+function iconeLook(formalidade){
+  const gravata = formalidade >= 4 ? `<line x1="50" y1="38" x2="50" y2="62" stroke="var(--accent)" stroke-width="3"/>` : '';
+  const blazerExtra = formalidade >= 3 ? `<path d="M28 40 L20 95 M72 40 L80 95" stroke="var(--accent-dim)" stroke-width="2"/>` : '';
+  return `
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M35 28 L50 40 L65 28 L78 38 L70 50 L64 44 L64 95 L36 95 L36 44 L30 50 L22 38 Z"
+      stroke="var(--accent-bright)" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M50 40 L44 55 L50 62 L56 55 Z" stroke="var(--accent-bright)" stroke-width="1.6"/>
+    ${gravata}
+    ${blazerExtra}
+  </svg>`;
+}
+
+function corFundo(estacao){
+  return `linear-gradient(150deg, ${estacao.color}22, var(--bg-card) 65%)`;
+}
+
+// ---- estado dos filtros ----
+const state = { ocasiao:new Set(), estacao:new Set(), temperatura:new Set(), periodo:new Set() };
+let resultadosAtuais = [];
+
+function renderChips(){
+  const ocasiaoWrap = document.getElementById('ocasiaoChips');
+  ocasiaoWrap.innerHTML = OCASIOES.map(o=>`<button class="chip" data-value="${o}">${o}</button>`).join('');
+  ocasiaoWrap.querySelectorAll('.chip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const v = el.dataset.value;
+      state.ocasiao.has(v) ? state.ocasiao.delete(v) : state.ocasiao.add(v);
+      el.classList.toggle('active');
+      render();
+    });
+  });
+
+  const estacaoWrap = document.getElementById('estacaoChips');
+  estacaoWrap.innerHTML = ESTACOES.map(e=>`<button class="chip" data-value="${e.id}">${e.label}</button>`).join('');
+  estacaoWrap.querySelectorAll('.chip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const v = el.dataset.value;
+      state.estacao.has(v) ? state.estacao.delete(v) : state.estacao.add(v);
+      el.classList.toggle('active');
+      render();
+    });
+  });
+
+  const temperaturaWrap = document.getElementById('temperaturaChips');
+  temperaturaWrap.innerHTML = TEMPERATURAS.map(t=>`<button class="chip" data-value="${t}">${t}</button>`).join('');
+  temperaturaWrap.querySelectorAll('.chip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const v = el.dataset.value;
+      state.temperatura.has(v) ? state.temperatura.delete(v) : state.temperatura.add(v);
+      el.classList.toggle('active');
+      render();
+    });
+  });
+
+  const periodoWrap = document.getElementById('periodoChips');
+  periodoWrap.innerHTML = PERIODOS.map(p=>`<button class="chip" data-value="${p}">${p}</button>`).join('');
+  periodoWrap.querySelectorAll('.chip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const v = el.dataset.value;
+      state.periodo.has(v) ? state.periodo.delete(v) : state.periodo.add(v);
+      el.classList.toggle('active');
+      render();
+    });
+  });
+}
+
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  state.ocasiao.clear(); state.estacao.clear(); state.temperatura.clear(); state.periodo.clear();
+  document.querySelectorAll('.chip.active').forEach(c=>c.classList.remove('active'));
+  render();
+});
+
+function filtrar(){
+  return LOOKS.filter(look=>{
+    if(state.ocasiao.size && !look.ocasioes.some(o=>state.ocasiao.has(o))) return false;
+    if(state.estacao.size && !look.estacoes.some(e=>state.estacao.has(e.id))) return false;
+    if(state.temperatura.size && !look.temperaturas.some(t=>state.temperatura.has(t))) return false;
+    if(state.periodo.size && !look.periodos.some(p=>state.periodo.has(p))) return false;
+    return true;
+  });
+}
+
+function render(){
+  const resultados = filtrar();
+  resultadosAtuais = resultados;
+  document.getElementById('countNum').textContent = resultados.length;
+  const grid = document.getElementById('grid');
+
+  if(resultados.length === 0){
+    if(LOOKS.length === 0){
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <h3>Catálogo em construção</h3>
+        <div>Nenhum look foi adicionado ainda — os looks aparecem aqui assim que forem cadastrados.</div>
+      </div>`;
+    } else {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <h3>Nenhum look para essa combinação</h3>
+        <div>Tente ampliar a faixa de temperatura ou remover algum filtro.</div>
+      </div>`;
+    }
+    return;
+  }
+
+  grid.innerHTML = resultados.map((look, idx)=>`
+    <div class="card" data-idx="${idx}">
+      <div class="card-art" style="background:${corFundo(look.estacoes[0])}">
+        ${look.imagem
+          ? `<img src="${look.imagem}" alt="${look.titulo}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1;">`
+          : iconeLook(look.formalidade)}
+      </div>
+      <div class="card-body">
+        <div class="card-title">${look.titulo}</div>
+        <div class="card-meta">
+          ${look.ocasioes.map(o=>`<span class="meta-pill">${o}</span>`).join('')}
+          ${look.estacoes.map(e=>`<span class="meta-pill">${e.label}</span>`).join('')}
+          ${look.temperaturas.map(t=>`<span class="meta-pill">${t}</span>`).join('')}
+          ${look.periodos.map(p=>`<span class="meta-pill">${p}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.card').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const idx = parseInt(el.dataset.idx, 10);
+      abrirLightbox(resultadosAtuais[idx]);
+    });
+  });
+}
+
+// ==========================================================================
+// ARMAZENAMENTO PERSISTENTE DOS LOOKS REAIS (agora via Supabase)
+// ==========================================================================
+async function carregarLooksReais(){
+  if(!supabaseClient) return [];
+  try{
+    const { data, error } = await supabaseClient
+      .from('looks')
+      .select('*')
+      .order('criado_em', { ascending: true });
+    if(error) throw error;
+    return (data || []).map(row => ({
+      dbId: row.id,
+      titulo: row.titulo,
+      imagem: row.imagem_url,
+      ocasioes: row.ocasioes || [],
+      estacoes: row.estacoes || [],
+      temperaturas: row.temperaturas || [],
+      periodos: row.periodos || [],
+      destaque: row.destaque || false
+    }));
+  }catch(e){
+    console.error('Erro ao carregar looks do Supabase:', formatarErro(e));
+    return [];
+  }
+}
+
+function rebuildLooks(){
+  LOOKS = gerarLooks(0, looksReaisSalvos);
+  // número exibido no hero ("LOOKS CATALOGADOS") é fixo — não reflete a contagem real de LOOKS.length
+}
+
+// ==========================================================================
+// FORMULÁRIO "+ ADICIONAR LOOK"
+// ==========================================================================
+function popularFormAdmin(){
+  document.getElementById('checkOcasioes').innerHTML = OCASIOES.map(o=>
+    `<div class="checkbox-pill" data-group="ocasiao" data-value="${o}">${o}</div>`).join('');
+
+  document.getElementById('checkEstacao').innerHTML = ESTACOES.map(e=>
+    `<div class="checkbox-pill" data-group="estacao" data-value="${e.id}">${e.label}</div>`).join('');
+
+  document.getElementById('checkTemperatura').innerHTML = TEMPERATURAS.map(t=>
+    `<div class="checkbox-pill" data-group="temperatura" data-value="${t}">${t}</div>`).join('');
+
+  document.getElementById('checkPeriodo').innerHTML = PERIODOS.map(p=>
+    `<div class="checkbox-pill" data-group="periodo" data-value="${p}">${p}</div>`).join('');
+
+  document.querySelectorAll('.checkbox-pill').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      el.classList.toggle('checked');
+    });
+  });
+}
+
+let arquivoFotoAtual = null;
+
+document.getElementById('inputFoto').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  arquivoFotoAtual = file;
+  document.getElementById('imgPreviewImg').src = URL.createObjectURL(file);
+  document.getElementById('imgPreview').style.display = 'block';
+});
+
+// ==========================================================================
+// NAVEGAÇÃO ENTRE PÁGINAS (apresentação x catálogo)
+// ==========================================================================
+function mostrarLanding(){
+  document.getElementById('landingPage').style.display = 'block';
+  document.getElementById('catalogPage').style.display = 'none';
+}
+function mostrarCatalogo(){
+  document.getElementById('landingPage').style.display = 'none';
+  document.getElementById('catalogPage').style.display = 'block';
+}
+
+async function sairDaConta(){
+  adminDesbloqueado = false;
+  if(supabaseClient){
+    try{ await supabaseClient.auth.signOut(); }catch(e){ console.error('Erro ao sair:', formatarErro(e)); }
+  }
+  mostrarLanding();
+}
+document.getElementById('btnSair').addEventListener('click', sairDaConta);
+
+// ==========================================================================
+// PROTEÇÃO DO PAINEL DE ADMIN (nível protótipo)
+// ==========================================================================
+// Troque o valor abaixo pela senha que só você vai saber.
+const SENHA_ADMIN = 'patrick2026';
+let adminDesbloqueado = false;
+let senhaProximaAcao = null; // 'catalogo' (vindo da landing) | 'modal' (vindo do botão + Adicionar look)
+
+function abrirModal(){
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function fecharModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+
+function abrirSobre(){ document.getElementById('sobreOverlay').classList.add('open'); }
+function fecharSobre(){ document.getElementById('sobreOverlay').classList.remove('open'); }
+document.getElementById('btnSobre').addEventListener('click', abrirSobre);
+document.getElementById('sobreClose').addEventListener('click', fecharSobre);
+document.getElementById('sobreOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'sobreOverlay') fecharSobre();
+});
+
+function abrirLojas(){ document.getElementById('lojasOverlay').classList.add('open'); }
+function fecharLojas(){ document.getElementById('lojasOverlay').classList.remove('open'); }
+document.getElementById('btnLojas').addEventListener('click', abrirLojas);
+document.getElementById('lojasClose').addEventListener('click', fecharLojas);
+document.getElementById('lojasOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'lojasOverlay') fecharLojas();
+});
+
+function abrirSenhaOverlay(proximaAcao){
+  senhaProximaAcao = proximaAcao;
+  document.getElementById('inputSenha').value = '';
+  document.getElementById('senhaErro').style.display = 'none';
+  document.getElementById('senhaOverlay').classList.add('open');
+  document.getElementById('inputSenha').focus();
+}
+function fecharSenhaOverlay(){
+  document.getElementById('senhaOverlay').classList.remove('open');
+}
+
+function confirmarSenha(){
+  const valor = document.getElementById('inputSenha').value;
+  if(valor === SENHA_ADMIN){
+    adminDesbloqueado = true;
+    fecharSenhaOverlay();
+    if(senhaProximaAcao === 'catalogo'){ mostrarCatalogo(); }
+    else { abrirModal(); }
+  } else {
+    document.getElementById('senhaErro').style.display = 'block';
+  }
+}
+
+document.getElementById('btnConfirmarSenha').addEventListener('click', confirmarSenha);
+document.getElementById('btnCancelarSenha').addEventListener('click', fecharSenhaOverlay);
+document.getElementById('inputSenha').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') confirmarSenha();
+});
+document.getElementById('senhaOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'senhaOverlay') fecharSenhaOverlay();
+});
+
+document.getElementById('btnAdminLanding').addEventListener('click', ()=>{
+  if(adminDesbloqueado){ mostrarCatalogo(); } else { abrirSenhaOverlay('catalogo'); }
+});
+document.getElementById('btnAbrirModal').addEventListener('click', ()=>{
+  if(adminDesbloqueado){ abrirModal(); } else { abrirSenhaOverlay('modal'); }
+});
+
+document.getElementById('btnCancelar').addEventListener('click', fecharModal);
+document.getElementById('modalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'modalOverlay') fecharModal();
+});
+
+function resetForm(){
+  arquivoFotoAtual = null;
+  document.getElementById('inputFoto').value = '';
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('inputTitulo').value = '';
+  document.querySelectorAll('.checkbox-pill.checked').forEach(el=>el.classList.remove('checked'));
+}
+
+function renderSavedList(){
+  const wrap = document.getElementById('savedList');
+  if(looksReaisSalvos.length === 0){
+    wrap.innerHTML = `<div class="saved-list-title">Looks salvos (0)</div>
+      <div style="color:var(--text-tertiary); font-size:12px;">Nenhum look real cadastrado ainda — os que você salvar aqui aparecem na grid do catálogo.</div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="saved-list-title">Looks salvos (${looksReaisSalvos.length})</div>` +
+    looksReaisSalvos.map(l=>`
+      <div class="saved-item">
+        <img src="${l.imagem}" alt="">
+        <span>${l.titulo}</span>
+        <span class="destaque-toggle" data-id="${l.dbId}" data-ativo="${l.destaque ? '1' : '0'}" title="Destacar na página inicial" style="cursor:pointer; margin-left:auto; color:${l.destaque ? 'var(--accent-bright)' : 'var(--text-tertiary)'};">★</span>
+        <span class="del" data-id="${l.dbId}" style="margin-left:10px;">remover</span>
+      </div>
+    `).join('');
+
+  wrap.querySelectorAll('.destaque-toggle').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      if(!supabaseClient) return;
+      const novoValor = el.dataset.ativo !== '1';
+      try{
+        const { error } = await supabaseClient.from('looks').update({ destaque: novoValor }).eq('id', el.dataset.id);
+        if(error) throw error;
+      }catch(e){
+        console.error('Erro ao atualizar destaque:', formatarErro(e));
+      }
+      looksReaisSalvos = await carregarLooksReais();
+      renderSavedList();
+      carregarPreviaLanding();
+    });
+  });
+
+  wrap.querySelectorAll('.del').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      if(!supabaseClient) return;
+      try{
+        const { error } = await supabaseClient.from('looks').delete().eq('id', el.dataset.id);
+        if(error) throw error;
+      }catch(e){
+        console.error('Erro ao remover look:', formatarErro(e));
+      }
+      looksReaisSalvos = await carregarLooksReais();
+      rebuildLooks();
+      render();
+      renderSavedList();
+    });
+  });
+}
+
+document.getElementById('btnSalvar').addEventListener('click', async ()=>{
+  const erroEl = document.getElementById('formErro');
+  erroEl.style.display = 'none';
+  const mostrarErro = (msg)=>{ erroEl.textContent = msg; erroEl.style.display = 'block'; };
+
+  const titulo = document.getElementById('inputTitulo').value.trim();
+  const ocasioes = Array.from(document.querySelectorAll('.checkbox-pill[data-group="ocasiao"].checked')).map(el=>el.dataset.value);
+  const estacoes = Array.from(document.querySelectorAll('.checkbox-pill[data-group="estacao"].checked')).map(el=>el.dataset.value);
+  const temperaturas = Array.from(document.querySelectorAll('.checkbox-pill[data-group="temperatura"].checked')).map(el=>el.dataset.value);
+  const periodos = Array.from(document.querySelectorAll('.checkbox-pill[data-group="periodo"].checked')).map(el=>el.dataset.value);
+  const destacado = document.getElementById('pillDestaque').classList.contains('checked');
+
+  if(!arquivoFotoAtual){ mostrarErro('Selecione uma foto do look.'); return; }
+  if(!titulo){ mostrarErro('Dê um título para o look.'); return; }
+  if(ocasioes.length === 0){ mostrarErro('Escolha ao menos uma ocasião.'); return; }
+  if(estacoes.length === 0){ mostrarErro('Escolha ao menos uma estação.'); return; }
+  if(temperaturas.length === 0){ mostrarErro('Escolha ao menos uma opção de temperatura.'); return; }
+  if(periodos.length === 0){ mostrarErro('Escolha ao menos uma opção de período.'); return; }
+
+  const btnSalvar = document.getElementById('btnSalvar');
+
+  if(!supabaseClient){
+    mostrarErro('Conexão com o banco de dados indisponível neste ambiente. Teste no site publicado.');
+    return;
+  }
+
+  btnSalvar.textContent = 'Enviando foto...';
+  btnSalvar.disabled = true;
+
+  try{
+    // 1) sobe a foto pro Supabase Storage
+    const nomeArquivo = `${Date.now()}-${arquivoFotoAtual.name.replace(/\s+/g,'-')}`;
+    const { error: uploadError } = await supabaseClient.storage
+      .from('looks')
+      .upload(nomeArquivo, arquivoFotoAtual);
+    if(uploadError) throw uploadError;
+
+    // 2) pega o link público da foto
+    const { data: urlData } = supabaseClient.storage.from('looks').getPublicUrl(nomeArquivo);
+    const imagemUrl = urlData.publicUrl;
+
+    btnSalvar.textContent = 'Salvando...';
+
+    // 3) grava o look na tabela
+    const { error: insertError } = await supabaseClient.from('looks').insert({
+      titulo,
+      imagem_url: imagemUrl,
+      ocasioes,
+      estacoes,
+      temperaturas,
+      periodos,
+      destaque: destacado
+    });
+    if(insertError) throw insertError;
+
+    looksReaisSalvos = await carregarLooksReais();
+    rebuildLooks();
+    render();
+    renderSavedList();
+    resetForm();
+    fecharModal();
+  }catch(e){
+    console.error('Erro ao salvar look no Supabase:', formatarErro(e));
+    mostrarErro('Não consegui salvar: ' + formatarErro(e));
+  }
+
+  btnSalvar.textContent = 'Salvar look';
+  btnSalvar.disabled = false;
+});
+
+// ==========================================================================
+// LIGHTBOX: FOTO DO LOOK EM TAMANHO COMPLETO
+// ==========================================================================
+function abrirLightbox(look){
+  const content = document.getElementById('lightboxContent');
+  content.innerHTML = `
+    ${look.imagem
+      ? `<img src="${look.imagem}" alt="${look.titulo}">`
+      : `<div class="lightbox-placeholder" style="background:${corFundo(look.estacoes[0])}">${iconeLook(look.formalidade)}</div>`}
+    <div class="lightbox-info">
+      <div class="lightbox-title">${look.titulo}</div>
+      <div class="lightbox-meta">
+        ${look.ocasioes.map(o=>`<span class="meta-pill">${o}</span>`).join('')}
+        ${look.estacoes.map(e=>`<span class="meta-pill">${e.label}</span>`).join('')}
+        ${look.temperaturas.map(t=>`<span class="meta-pill">${t}</span>`).join('')}
+        ${look.periodos.map(p=>`<span class="meta-pill">${p}</span>`).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('lightboxOverlay').classList.add('open');
+}
+function fecharLightbox(){
+  document.getElementById('lightboxOverlay').classList.remove('open');
+}
+document.getElementById('lightboxClose').addEventListener('click', fecharLightbox);
+document.getElementById('lightboxOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'lightboxOverlay') fecharLightbox();
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') fecharLightbox();
+});
+
+// ==========================================================================
+// CHECKOUT (redireciona para o Stripe)
+// ==========================================================================
+function abrirCheckout(){
+  document.getElementById('checkoutOverlay').classList.add('open');
+}
+function fecharCheckout(){
+  document.getElementById('checkoutOverlay').classList.remove('open');
+}
+
+document.getElementById('btnEntrarLanding').addEventListener('click', abrirAuth);
+document.getElementById('btnEntrarHero').addEventListener('click', abrirAuth);
+
+// ==========================================================================
+// LOGIN / CADASTRO DE CLIENTE (Supabase Auth)
+// ==========================================================================
+let authModo = 'login'; // 'login' | 'cadastro'
+
+function abrirAuth(){
+  authModo = 'login';
+  atualizarTextosAuth();
+  document.getElementById('authErro').style.display = 'none';
+  document.getElementById('authOverlay').classList.add('open');
+}
+function fecharAuth(){
+  document.getElementById('authOverlay').classList.remove('open');
+}
+function atualizarTextosAuth(){
+  if(authModo === 'login'){
+    document.getElementById('authTitulo').textContent = 'Entrar';
+    document.getElementById('authSubtitulo').textContent = 'Já tem uma conta? Entre com seu e-mail e senha.';
+    document.getElementById('btnAuthSubmit').textContent = 'Entrar';
+    document.getElementById('authCadastroBloco').style.display = 'block';
+    document.getElementById('authLoginBloco').style.display = 'none';
+  } else {
+    document.getElementById('authTitulo').textContent = 'Criar conta';
+    document.getElementById('authSubtitulo').textContent = 'Leva menos de um minuto — só e-mail e senha.';
+    document.getElementById('btnAuthSubmit').textContent = 'Criar minha conta';
+    document.getElementById('authCadastroBloco').style.display = 'none';
+    document.getElementById('authLoginBloco').style.display = 'block';
+  }
+}
+
+document.getElementById('authAlternar').addEventListener('click', ()=>{
+  authModo = 'cadastro';
+  atualizarTextosAuth();
+});
+document.getElementById('authAlternarVolta').addEventListener('click', ()=>{
+  authModo = 'login';
+  atualizarTextosAuth();
+});
+
+document.getElementById('authOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'authOverlay') fecharAuth();
+});
+
+// garante que existe uma linha na tabela de assinaturas pro usuário logado
+async function garantirLinhaAssinatura(userId){
+  if(!supabaseClient) return;
+  try{
+    await supabaseClient.from('assinaturas').insert({ user_id: userId, pago: false });
+  }catch(e){
+    // se já existir (conflito de chave primária), tudo bem — ignora
+  }
+}
+
+// verifica se o usuário logado já pagou
+async function verificarPago(userId){
+  if(!supabaseClient) return false;
+  try{
+    const { data, error } = await supabaseClient
+      .from('assinaturas')
+      .select('pago')
+      .eq('user_id', userId)
+      .single();
+    if(error) throw error;
+    return data ? data.pago === true : false;
+  }catch(e){
+    console.error('Erro ao verificar pagamento:', formatarErro(e));
+    return false;
+  }
+}
+
+document.getElementById('btnAuthSubmit').addEventListener('click', async ()=>{
+  const erroEl = document.getElementById('authErro');
+  erroEl.style.display = 'none';
+
+  if(!supabaseClient){
+    erroEl.textContent = 'Conexão indisponível neste ambiente. Teste no site publicado.';
+    erroEl.style.display = 'block';
+    return;
+  }
+
+  const email = document.getElementById('authEmail').value.trim();
+  const senha = document.getElementById('authSenha').value;
+  if(!email || !senha){
+    erroEl.textContent = 'Preencha e-mail e senha.';
+    erroEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('btnAuthSubmit');
+  btn.disabled = true;
+  btn.textContent = 'Aguarde...';
+
+  try{
+    if(authModo === 'cadastro'){
+      const { data, error } = await supabaseClient.auth.signUp({ email, password: senha });
+      if(error) throw error;
+      if(data.user){ await garantirLinhaAssinatura(data.user.id); }
+    } else {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
+      if(error) throw error;
+      if(data.user){ await garantirLinhaAssinatura(data.user.id); }
+    }
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    fecharAuth();
+
+    if(user){
+      const pago = await verificarPago(user.id);
+      if(pago){
+        mostrarCatalogo();
+      } else {
+        iniciarCheckoutStripe();
+      }
+    }
+  }catch(e){
+    erroEl.textContent = formatarErro(e);
+    erroEl.style.display = 'block';
+  }
+
+  btn.disabled = false;
+  atualizarTextosAuth();
+});
+
+// ==========================================================================
+// CHECKOUT REAL VIA STRIPE (função no Supabase Edge Functions)
+// ==========================================================================
+async function iniciarCheckoutStripe(){
+  if(!supabaseClient) return;
+  try{
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if(!session){ abrirAuth(); return; }
+
+    abrirCheckout();
+
+    const { data: resultado, error } = await supabaseClient.functions.invoke('clever-responder', {
+      method: 'POST'
+    });
+    if(error){
+      let mensagem = error.message;
+      try{
+        if(error.context){
+          const corpo = await error.context.json();
+          if(corpo?.error) mensagem = corpo.error;
+        }
+      }catch(_){ /* mantém a mensagem genérica se não der pra ler o corpo */ }
+      throw new Error(mensagem);
+    }
+    if(!resultado || !resultado.url) throw new Error(resultado?.error || 'Resposta inesperada ao iniciar pagamento');
+
+    window.location.href = resultado.url; // redireciona pro checkout hospedado pelo Stripe
+  }catch(e){
+    console.error('Erro ao iniciar checkout:', formatarErro(e));
+    fecharCheckout();
+    alert('Não consegui abrir o pagamento agora: ' + formatarErro(e));
+  }
+}
+document.getElementById('checkoutOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'checkoutOverlay') fecharCheckout();
+});
+
+// ==========================================================================
+// PRÉVIA DE FOTOS NA LANDING PAGE
+// ==========================================================================
+async function carregarPreviaLanding(){
+  const grid = document.getElementById('landingPreviaGrid');
+  if(!supabaseClient) return;
+  try{
+    const { data, error } = await supabaseClient
+      .from('looks')
+      .select('titulo, imagem_url')
+      .eq('destaque', true)
+      .order('criado_em', { ascending: false })
+      .limit(3);
+    if(error) throw error;
+    if(!data || data.length === 0){
+      document.querySelector('.landing-previa-titulo').style.display = 'none';
+      return;
+    }
+    grid.innerHTML = data.map(l => `
+      <div class="previa-item"><img src="${l.imagem_url}" alt="${l.titulo}"></div>
+    `).join('');
+  }catch(e){
+    console.error('Erro ao carregar prévia da landing:', formatarErro(e));
+    document.querySelector('.landing-previa-titulo').style.display = 'none';
+  }
+}
+
+// ==========================================================================
+// INICIALIZAÇÃO
+// ==========================================================================
+async function init(){
+  renderChips();
+  popularFormAdmin();
+  looksReaisSalvos = await carregarLooksReais();
+  rebuildLooks();
+  render();
+  renderSavedList();
+  carregarPreviaLanding();
+
+  mostrarLanding(); // estado padrão enquanto verifica a sessão
+
+  if(supabaseClient){
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if(user){
+      const pago = await verificarPago(user.id);
+      if(pago){
+        mostrarCatalogo();
+      } else if(new URLSearchParams(window.location.search).get('pago') === 'sucesso'){
+        // acabou de voltar do Stripe — o webhook pode levar alguns segundos pra confirmar,
+        // então tenta verificar de novo algumas vezes antes de desistir
+        for(let tentativa=0; tentativa<5; tentativa++){
+          await new Promise(res=>setTimeout(res, 1500));
+          const pagoAgora = await verificarPago(user.id);
+          if(pagoAgora){ mostrarCatalogo(); break; }
+        }
+      }
+    }
+  }
+}
+init();
+</script>
+
+</body>
+</html>
