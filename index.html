@@ -148,13 +148,27 @@
   .results-count{
     padding:20px 5vw 0; color:var(--text-tertiary); font-size:13px;
     font-family:'JetBrains Mono', monospace;
+    display:flex; justify-content:space-between; align-items:center; gap:16px;
   }
   .results-count b{color:var(--accent-bright); font-weight:500;}
+  .btn-toggle-grade{
+    display:none; align-items:center; gap:6px; background:transparent; border:1px solid var(--border);
+    color:var(--text-secondary); padding:7px 13px; border-radius:20px; font-size:12px;
+    font-family:'Inter', sans-serif; cursor:pointer; white-space:nowrap;
+  }
+  .btn-toggle-grade:hover{border-color:var(--accent-dim); color:var(--text-primary);}
 
   /* ---------- GRID ---------- */
   .grid{
     display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
     gap:28px; padding:28px 5vw 100px;
+  }
+  @media (max-width:640px){
+    .btn-toggle-grade{display:flex;}
+    .grid.grid-compacta{grid-template-columns:repeat(2, 1fr); gap:10px;}
+    .grid.grid-compacta .card-body{padding:10px;}
+    .grid.grid-compacta .card-title{font-size:14px;}
+    .grid.grid-compacta .meta-pill{font-size:9px; padding:2px 7px;}
   }
   .card{
     background:var(--bg-card); border:1px solid var(--border); border-radius:3px;
@@ -635,7 +649,10 @@
   <button class="btn-clear" id="clearBtn">Limpar filtros</button>
 </div>
 
-<div class="results-count"><b id="countNum">0</b> looks encontrados</div>
+<div class="results-count">
+  <div><b id="countNum">0</b> looks encontrados</div>
+  <button class="btn-toggle-grade" id="btnToggleGrade" type="button">▦ Ver em grade</button>
+</div>
 
 <div class="grid" id="grid"></div>
 
@@ -822,6 +839,24 @@ function filtrar(){
     return true;
   });
 }
+
+// ---- alternar entre visualização em lista e grade compacta (mobile) ----
+let visualizacaoGrade = false;
+function atualizarVisualizacao(){
+  const grid = document.getElementById('grid');
+  const btn = document.getElementById('btnToggleGrade');
+  if(visualizacaoGrade){
+    grid.classList.add('grid-compacta');
+    btn.textContent = '☰ Ver em lista';
+  } else {
+    grid.classList.remove('grid-compacta');
+    btn.textContent = '▦ Ver em grade';
+  }
+}
+document.getElementById('btnToggleGrade').addEventListener('click', ()=>{
+  visualizacaoGrade = !visualizacaoGrade;
+  atualizarVisualizacao();
+});
 
 function render(){
   const resultados = filtrar();
