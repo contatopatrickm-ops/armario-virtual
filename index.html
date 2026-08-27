@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Armário Virtual — Patrick Muñoz</title>
+<meta name="description" content="Catálogo de looks masculinos com filtros por ocasião, estação, temperatura e período. Curadoria de Patrick Muñoz.">
+
+<!-- Prévia ao compartilhar o link (WhatsApp, Instagram, etc.) -->
+<meta property="og:title" content="Armário Virtual — Patrick Muñoz">
+<meta property="og:description" content="Nunca mais fique sem saber o que vestir. Catálogo de looks masculinos por Patrick Muñoz.">
+<meta property="og:image" content="https://www.meuarmariovirtual.com.br/og-image.png">
+<meta property="og:url" content="https://www.meuarmariovirtual.com.br">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Armário Virtual — Patrick Muñoz">
+<meta name="twitter:description" content="Nunca mais fique sem saber o que vestir.">
+<meta name="twitter:image" content="https://www.meuarmariovirtual.com.br/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -613,7 +625,7 @@
   <div class="nav-right">
     <button class="nav-link" id="btnSobre" type="button">Sobre</button>
     <button class="nav-link" id="btnLojas" type="button">Lojas que eu indico</button>
-    <button class="btn-add-look" id="btnAbrirModal" type="button">+ Adicionar look</button>
+    <button class="btn-add-look" id="btnAbrirModal" type="button" style="display:none;">+ Adicionar look</button>
     <button class="nav-link" id="btnSair" type="button">Sair</button>
   </div>
 </nav>
@@ -986,6 +998,7 @@ function mostrarCatalogo(){
 
 async function sairDaConta(){
   adminDesbloqueado = false;
+  document.getElementById('btnAbrirModal').style.display = 'none';
   if(supabaseClient){
     try{ await supabaseClient.auth.signOut(); }catch(e){ console.error('Erro ao sair:', formatarErro(e)); }
   }
@@ -1068,6 +1081,7 @@ function confirmarSenha(){
   const valor = document.getElementById('inputSenha').value;
   if(valor === SENHA_ADMIN){
     adminDesbloqueado = true;
+    document.getElementById('btnAbrirModal').style.display = 'inline-block';
     fecharSenhaOverlay();
     if(senhaProximaAcao === 'catalogo'){ mostrarCatalogo(); }
     else { abrirModal(); }
