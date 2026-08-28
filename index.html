@@ -690,6 +690,20 @@ function formatarErro(e){
   if(e.message) return `${e.message}${e.details ? ' — ' + e.details : ''}${e.hint ? ' (dica: ' + e.hint + ')' : ''}`;
   try{ return JSON.stringify(e); }catch(_){ return String(e); }
 }
+
+// traduz as mensagens mais comuns de autenticação do Supabase pro português;
+// se não reconhecer a mensagem, cai no formatarErro genérico (em inglês mesmo)
+function formatarErroAuth(e){
+  const msg = (e && e.message ? e.message : '').toLowerCase();
+  if(msg.includes('invalid login credentials')) return 'E-mail ou senha incorretos.';
+  if(msg.includes('email not confirmed')) return 'Confirme seu e-mail antes de entrar — verifique sua caixa de entrada.';
+  if(msg.includes('user already registered') || msg.includes('already registered')) return 'Esse e-mail já está cadastrado. Tente entrar em vez de criar uma conta nova.';
+  if(msg.includes('password should be at least')) return 'A senha precisa ter pelo menos 6 caracteres.';
+  if(msg.includes('unable to validate email') || msg.includes('invalid email')) return 'Digite um e-mail válido.';
+  if(msg.includes('rate limit') || msg.includes('too many requests')) return 'Muitas tentativas seguidas — aguarde um instante e tente de novo.';
+  if(msg.includes('user not found')) return 'Não encontramos uma conta com esse e-mail.';
+  return formatarErro(e);
+}
 try{
   if(typeof supabase !== 'undefined'){
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1410,7 +1424,7 @@ document.getElementById('btnAuthSubmit').addEventListener('click', async ()=>{
       sucessoEl.textContent = 'Link enviado! Confira sua caixa de entrada (e o spam) e clique nele pra criar uma nova senha.';
       sucessoEl.style.display = 'block';
     }catch(e){
-      erroEl.textContent = formatarErro(e);
+      erroEl.textContent = formatarErroAuth(e);
       erroEl.style.display = 'block';
     }
     btn.disabled = false;
@@ -1458,7 +1472,7 @@ document.getElementById('btnAuthSubmit').addEventListener('click', async ()=>{
       }
     }
   }catch(e){
-    erroEl.textContent = formatarErro(e);
+    erroEl.textContent = formatarErroAuth(e);
     erroEl.style.display = 'block';
   }
 
@@ -1520,7 +1534,7 @@ document.getElementById('btnSalvarNovaSenha').addEventListener('click', async ()
       }
     }
   }catch(e){
-    erroEl.textContent = formatarErro(e);
+    erroEl.textContent = formatarErroAuth(e);
     erroEl.style.display = 'block';
   }
 
