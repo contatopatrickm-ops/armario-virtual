@@ -1463,7 +1463,7 @@ document.getElementById('btnAuthSubmit').addEventListener('click', async ()=>{
   }
 
   btn.disabled = false;
-  atualizarTextosAuth();
+  btn.textContent = authModo === 'cadastro' ? 'Criar minha conta' : 'Entrar';
 });
 
 // ==========================================================================
