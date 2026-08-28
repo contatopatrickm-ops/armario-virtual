@@ -500,22 +500,6 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="senhaOverlay">
-  <div class="modal" style="max-width:340px;">
-    <h2>Área restrita</h2>
-    <div class="modal-sub">Digite a senha de administrador para adicionar looks.</div>
-    <div class="form-field">
-      <label>Senha</label>
-      <input type="password" id="inputSenha" placeholder="••••••••">
-    </div>
-    <div id="senhaErro" style="color:#C97B4A; font-size:12px; margin-bottom:14px; display:none;">Senha incorreta. Tente novamente.</div>
-    <div class="modal-actions">
-      <button class="btn-secondary" id="btnCancelarSenha" type="button">Cancelar</button>
-      <button class="btn-primary" id="btnConfirmarSenha" type="button">Entrar</button>
-    </div>
-  </div>
-</div>
-
 <div class="checkout-overlay" id="checkoutOverlay">
   <div class="checkout-card" style="text-align:center;">
     <div class="checkout-eyebrow">Armário Virtual</div>
@@ -584,7 +568,6 @@
       <div class="logo-signature">por Patrick Muñoz</div>
     </div>
     <div class="nav-right">
-      <button class="btn-add-look" id="btnAdminLanding" type="button">admin</button>
       <button class="btn-entrar" id="btnEntrarLanding" type="button">Entrar</button>
     </div>
   </nav>
@@ -1008,12 +991,30 @@ async function sairDaConta(){
 document.getElementById('btnSair').addEventListener('click', sairDaConta);
 
 // ==========================================================================
-// PROTEÇÃO DO PAINEL DE ADMIN (nível protótipo)
+// PAINEL DE ADMIN — reconhecido pela conta de login, verificado no banco
 // ==========================================================================
-// Troque o valor abaixo pela senha que só você vai saber.
-const SENHA_ADMIN = 'patrick2026';
 let adminDesbloqueado = false;
-let senhaProximaAcao = null; // 'catalogo' (vindo da landing) | 'modal' (vindo do botão + Adicionar look)
+
+async function verificarAdmin(userId){
+  if(!supabaseClient) return false;
+  try{
+    const { data, error } = await supabaseClient
+      .from('admins')
+      .select('user_id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if(error) throw error;
+    return !!data;
+  }catch(e){
+    console.error('Erro ao verificar admin:', formatarErro(e));
+    return false;
+  }
+}
+
+function ativarModoAdmin(){
+  adminDesbloqueado = true;
+  document.getElementById('btnAbrirModal').style.display = 'inline-block';
+}
 
 function abrirModal(){
   document.getElementById('modalOverlay').classList.add('open');
@@ -1067,45 +1068,7 @@ document.getElementById('lojasOverlay').addEventListener('click', (e)=>{
   if(e.target.id === 'lojasOverlay') fecharLojas();
 });
 
-function abrirSenhaOverlay(proximaAcao){
-  senhaProximaAcao = proximaAcao;
-  document.getElementById('inputSenha').value = '';
-  document.getElementById('senhaErro').style.display = 'none';
-  document.getElementById('senhaOverlay').classList.add('open');
-  document.getElementById('inputSenha').focus();
-}
-function fecharSenhaOverlay(){
-  document.getElementById('senhaOverlay').classList.remove('open');
-}
-
-function confirmarSenha(){
-  const valor = document.getElementById('inputSenha').value;
-  if(valor === SENHA_ADMIN){
-    adminDesbloqueado = true;
-    document.getElementById('btnAbrirModal').style.display = 'inline-block';
-    fecharSenhaOverlay();
-    if(senhaProximaAcao === 'catalogo'){ mostrarCatalogo(); }
-    else { abrirModal(); }
-  } else {
-    document.getElementById('senhaErro').style.display = 'block';
-  }
-}
-
-document.getElementById('btnConfirmarSenha').addEventListener('click', confirmarSenha);
-document.getElementById('btnCancelarSenha').addEventListener('click', fecharSenhaOverlay);
-document.getElementById('inputSenha').addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter') confirmarSenha();
-});
-document.getElementById('senhaOverlay').addEventListener('click', (e)=>{
-  if(e.target.id === 'senhaOverlay') fecharSenhaOverlay();
-});
-
-document.getElementById('btnAdminLanding').addEventListener('click', ()=>{
-  if(adminDesbloqueado){ mostrarCatalogo(); } else { abrirSenhaOverlay('catalogo'); }
-});
-document.getElementById('btnAbrirModal').addEventListener('click', ()=>{
-  if(adminDesbloqueado){ abrirModal(); } else { abrirSenhaOverlay('modal'); }
-});
+document.getElementById('btnAbrirModal').addEventListener('click', abrirModal);
 
 document.getElementById('btnCancelar').addEventListener('click', fecharModal);
 document.getElementById('modalOverlay').addEventListener('click', (e)=>{
@@ -1415,11 +1378,17 @@ document.getElementById('btnAuthSubmit').addEventListener('click', async ()=>{
     fecharAuth();
 
     if(user){
-      const pago = await verificarPago(user.id);
-      if(pago){
+      const souAdmin = await verificarAdmin(user.id);
+      if(souAdmin){
+        ativarModoAdmin();
         mostrarCatalogo();
       } else {
-        iniciarCheckoutStripe();
+        const pago = await verificarPago(user.id);
+        if(pago){
+          mostrarCatalogo();
+        } else {
+          iniciarCheckoutStripe();
+        }
       }
     }
   }catch(e){
@@ -1512,16 +1481,22 @@ async function init(){
   if(supabaseClient){
     const { data: { user } } = await supabaseClient.auth.getUser();
     if(user){
-      const pago = await verificarPago(user.id);
-      if(pago){
+      const souAdmin = await verificarAdmin(user.id);
+      if(souAdmin){
+        ativarModoAdmin();
         mostrarCatalogo();
-      } else if(new URLSearchParams(window.location.search).get('pago') === 'sucesso'){
-        // acabou de voltar do Stripe — o webhook pode levar alguns segundos pra confirmar,
-        // então tenta verificar de novo algumas vezes antes de desistir
-        for(let tentativa=0; tentativa<5; tentativa++){
-          await new Promise(res=>setTimeout(res, 1500));
-          const pagoAgora = await verificarPago(user.id);
-          if(pagoAgora){ mostrarCatalogo(); break; }
+      } else {
+        const pago = await verificarPago(user.id);
+        if(pago){
+          mostrarCatalogo();
+        } else if(new URLSearchParams(window.location.search).get('pago') === 'sucesso'){
+          // acabou de voltar do Stripe — o webhook pode levar alguns segundos pra confirmar,
+          // então tenta verificar de novo algumas vezes antes de desistir
+          for(let tentativa=0; tentativa<5; tentativa++){
+            await new Promise(res=>setTimeout(res, 1500));
+            const pagoAgora = await verificarPago(user.id);
+            if(pagoAgora){ mostrarCatalogo(); break; }
+          }
         }
       }
     }
