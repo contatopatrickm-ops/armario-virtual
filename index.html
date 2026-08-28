@@ -477,14 +477,19 @@
       <label>E-mail</label>
       <input type="email" id="authEmail" placeholder="voce@email.com">
     </div>
-    <div class="form-field">
+    <div class="form-field" id="campoSenhaAuth">
       <label>Senha</label>
       <input type="password" id="authSenha" placeholder="••••••••">
     </div>
 
     <div id="authErro" style="color:#C97B4A; font-size:12px; margin-bottom:14px; display:none;"></div>
+    <div id="authSucesso" style="color:var(--accent-bright); font-size:12px; margin-bottom:14px; display:none;"></div>
 
     <button class="btn-primary" id="btnAuthSubmit" type="button" style="width:100%;">Entrar</button>
+
+    <div id="linkEsqueciSenha" style="text-align:center; margin-top:12px;">
+      <span id="authIrRecuperar" style="cursor:pointer; text-decoration:underline; font-size:12px; color:var(--text-tertiary);">Esqueci minha senha</span>
+    </div>
 
     <div class="auth-divider"><span>ou</span></div>
 
@@ -497,6 +502,22 @@
     <div id="authLoginBloco" style="display:none; text-align:center;">
       <button class="btn-secondary" id="authAlternarVolta" type="button" style="width:100%;">Já tenho conta — quero entrar</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="novaSenhaOverlay">
+  <div class="modal" style="max-width:360px;">
+    <h2>Criar nova senha</h2>
+    <div class="modal-sub">Defina uma nova senha pra sua conta.</div>
+
+    <div class="form-field">
+      <label>Nova senha</label>
+      <input type="password" id="novaSenhaInput" placeholder="••••••••">
+    </div>
+
+    <div id="novaSenhaErro" style="color:#C97B4A; font-size:12px; margin-bottom:14px; display:none;"></div>
+
+    <button class="btn-primary" id="btnSalvarNovaSenha" type="button" style="width:100%;">Salvar nova senha</button>
   </div>
 </div>
 
@@ -1274,30 +1295,46 @@ document.getElementById('btnEntrarHero').addEventListener('click', abrirAuth);
 // ==========================================================================
 // LOGIN / CADASTRO DE CLIENTE (Supabase Auth)
 // ==========================================================================
-let authModo = 'login'; // 'login' | 'cadastro'
+let authModo = 'login'; // 'login' | 'cadastro' | 'recuperar'
 
 function abrirAuth(){
   authModo = 'login';
   atualizarTextosAuth();
   document.getElementById('authErro').style.display = 'none';
+  document.getElementById('authSucesso').style.display = 'none';
   document.getElementById('authOverlay').classList.add('open');
 }
 function fecharAuth(){
   document.getElementById('authOverlay').classList.remove('open');
 }
 function atualizarTextosAuth(){
+  document.getElementById('authErro').style.display = 'none';
+  document.getElementById('authSucesso').style.display = 'none';
+
   if(authModo === 'login'){
     document.getElementById('authTitulo').textContent = 'Entrar';
     document.getElementById('authSubtitulo').textContent = 'Já tem uma conta? Entre com seu e-mail e senha.';
     document.getElementById('btnAuthSubmit').textContent = 'Entrar';
     document.getElementById('authCadastroBloco').style.display = 'block';
     document.getElementById('authLoginBloco').style.display = 'none';
-  } else {
+    document.getElementById('campoSenhaAuth').style.display = 'block';
+    document.getElementById('linkEsqueciSenha').style.display = 'block';
+  } else if(authModo === 'cadastro'){
     document.getElementById('authTitulo').textContent = 'Criar conta';
     document.getElementById('authSubtitulo').textContent = 'Leva menos de um minuto — só e-mail e senha.';
     document.getElementById('btnAuthSubmit').textContent = 'Criar minha conta';
     document.getElementById('authCadastroBloco').style.display = 'none';
     document.getElementById('authLoginBloco').style.display = 'block';
+    document.getElementById('campoSenhaAuth').style.display = 'block';
+    document.getElementById('linkEsqueciSenha').style.display = 'none';
+  } else if(authModo === 'recuperar'){
+    document.getElementById('authTitulo').textContent = 'Recuperar senha';
+    document.getElementById('authSubtitulo').textContent = 'Digite seu e-mail — vamos mandar um link pra você criar uma senha nova.';
+    document.getElementById('btnAuthSubmit').textContent = 'Enviar link de recuperação';
+    document.getElementById('authCadastroBloco').style.display = 'none';
+    document.getElementById('authLoginBloco').style.display = 'block';
+    document.getElementById('campoSenhaAuth').style.display = 'none';
+    document.getElementById('linkEsqueciSenha').style.display = 'none';
   }
 }
 
@@ -1307,6 +1344,10 @@ document.getElementById('authAlternar').addEventListener('click', ()=>{
 });
 document.getElementById('authAlternarVolta').addEventListener('click', ()=>{
   authModo = 'login';
+  atualizarTextosAuth();
+});
+document.getElementById('authIrRecuperar').addEventListener('click', ()=>{
+  authModo = 'recuperar';
   atualizarTextosAuth();
 });
 
@@ -1343,7 +1384,9 @@ async function verificarPago(userId){
 
 document.getElementById('btnAuthSubmit').addEventListener('click', async ()=>{
   const erroEl = document.getElementById('authErro');
+  const sucessoEl = document.getElementById('authSucesso');
   erroEl.style.display = 'none';
+  sucessoEl.style.display = 'none';
 
   if(!supabaseClient){
     erroEl.textContent = 'Conexão indisponível neste ambiente. Teste no site publicado.';
@@ -1352,6 +1395,29 @@ document.getElementById('btnAuthSubmit').addEventListener('click', async ()=>{
   }
 
   const email = document.getElementById('authEmail').value.trim();
+
+  // modo "esqueci minha senha" — só precisa do e-mail
+  if(authModo === 'recuperar'){
+    if(!email){ erroEl.textContent = 'Digite seu e-mail.'; erroEl.style.display = 'block'; return; }
+    const btn = document.getElementById('btnAuthSubmit');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    try{
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + window.location.pathname
+      });
+      if(error) throw error;
+      sucessoEl.textContent = 'Link enviado! Confira sua caixa de entrada (e o spam) e clique nele pra criar uma nova senha.';
+      sucessoEl.style.display = 'block';
+    }catch(e){
+      erroEl.textContent = formatarErro(e);
+      erroEl.style.display = 'block';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Enviar link de recuperação';
+    return;
+  }
+
   const senha = document.getElementById('authSenha').value;
   if(!email || !senha){
     erroEl.textContent = 'Preencha e-mail e senha.';
@@ -1398,6 +1464,68 @@ document.getElementById('btnAuthSubmit').addEventListener('click', async ()=>{
 
   btn.disabled = false;
   atualizarTextosAuth();
+});
+
+// ==========================================================================
+// RECUPERAÇÃO DE SENHA — detecta o link clicado no e-mail e pede a nova senha
+// ==========================================================================
+function abrirNovaSenhaOverlay(){
+  document.getElementById('novaSenhaInput').value = '';
+  document.getElementById('novaSenhaErro').style.display = 'none';
+  fecharAuth();
+  document.getElementById('novaSenhaOverlay').classList.add('open');
+}
+function fecharNovaSenhaOverlay(){
+  document.getElementById('novaSenhaOverlay').classList.remove('open');
+}
+
+if(supabaseClient){
+  supabaseClient.auth.onAuthStateChange((event, session)=>{
+    if(event === 'PASSWORD_RECOVERY'){
+      abrirNovaSenhaOverlay();
+    }
+  });
+}
+
+document.getElementById('btnSalvarNovaSenha').addEventListener('click', async ()=>{
+  const erroEl = document.getElementById('novaSenhaErro');
+  erroEl.style.display = 'none';
+
+  const novaSenha = document.getElementById('novaSenhaInput').value;
+  if(!novaSenha || novaSenha.length < 6){
+    erroEl.textContent = 'A senha precisa ter pelo menos 6 caracteres.';
+    erroEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('btnSalvarNovaSenha');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+
+  try{
+    const { error } = await supabaseClient.auth.updateUser({ password: novaSenha });
+    if(error) throw error;
+
+    fecharNovaSenhaOverlay();
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if(user){
+      const souAdmin = await verificarAdmin(user.id);
+      if(souAdmin){
+        ativarModoAdmin();
+        mostrarCatalogo();
+      } else {
+        const pago = await verificarPago(user.id);
+        if(pago){ mostrarCatalogo(); } else { iniciarCheckoutStripe(); }
+      }
+    }
+  }catch(e){
+    erroEl.textContent = formatarErro(e);
+    erroEl.style.display = 'block';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Salvar nova senha';
 });
 
 // ==========================================================================
