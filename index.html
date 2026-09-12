@@ -940,6 +940,32 @@ function render(){
 // ==========================================================================
 // ARMAZENAMENTO PERSISTENTE DOS LOOKS REAIS (agora via Supabase)
 // ==========================================================================
+
+// o bucket de fotos é privado agora — extrai só o caminho do arquivo, tanto de
+// links antigos (que guardavam a URL pública completa) quanto do formato novo
+// (que guarda só o nome do arquivo)
+function extrairPathStorage(valor){
+  if(!valor) return null;
+  const marcador = '/object/public/looks/';
+  const idx = valor.indexOf(marcador);
+  if(idx !== -1) return decodeURIComponent(valor.slice(idx + marcador.length));
+  return valor;
+}
+
+// gera um link temporário (expira em 1 hora) pra exibir a foto — nunca fica público
+async function gerarUrlAssinada(valorArmazenado){
+  if(!valorArmazenado || !supabaseClient) return null;
+  const path = extrairPathStorage(valorArmazenado);
+  try{
+    const { data, error } = await supabaseClient.storage.from('looks').createSignedUrl(path, 3600);
+    if(error) throw error;
+    return data.signedUrl;
+  }catch(e){
+    console.error('Erro ao gerar URL assinada:', formatarErro(e));
+    return null;
+  }
+}
+
 async function carregarLooksReais(){
   if(!supabaseClient) return [];
   try{
@@ -948,16 +974,16 @@ async function carregarLooksReais(){
       .select('*')
       .order('criado_em', { ascending: true });
     if(error) throw error;
-    return (data || []).map(row => ({
+    return await Promise.all((data || []).map(async row => ({
       dbId: row.id,
       titulo: row.titulo,
-      imagem: row.imagem_url,
+      imagem: await gerarUrlAssinada(row.imagem_url),
       ocasioes: row.ocasioes || [],
       estacoes: row.estacoes || [],
       temperaturas: row.temperaturas || [],
       periodos: row.periodos || [],
       destaque: row.destaque || false
-    }));
+    })));
   }catch(e){
     console.error('Erro ao carregar looks do Supabase:', formatarErro(e));
     return [];
@@ -1211,7 +1237,7 @@ document.getElementById('btnSalvar').addEventListener('click', async ()=>{
   btnSalvar.disabled = true;
 
   try{
-    let imagemUrl = null;
+    let caminhoArquivo = null;
 
     // só faz upload se um novo arquivo foi escolhido (obrigatório ao criar, opcional ao editar)
     if(arquivoFotoAtual){
@@ -1222,8 +1248,7 @@ document.getElementById('btnSalvar').addEventListener('click', async ()=>{
         .upload(nomeArquivo, arquivoFotoAtual);
       if(uploadError) throw uploadError;
 
-      const { data: urlData } = supabaseClient.storage.from('looks').getPublicUrl(nomeArquivo);
-      imagemUrl = urlData.publicUrl;
+      caminhoArquivo = nomeArquivo; // guardamos só o caminho — o bucket é privado, sem link público
     }
 
     const dadosLook = {
@@ -1234,7 +1259,7 @@ document.getElementById('btnSalvar').addEventListener('click', async ()=>{
       periodos,
       destaque: destacado
     };
-    if(imagemUrl){ dadosLook.imagem_url = imagemUrl; }
+    if(caminhoArquivo){ dadosLook.imagem_url = caminhoArquivo; }
 
     if(looksEditandoId){
       btnSalvar.textContent = 'Salvando alterações...';
@@ -1460,11 +1485,13 @@ document.getElementById('btnAuthSubmit').addEventListener('click', async ()=>{
     if(user){
       const souAdmin = await verificarAdmin(user.id);
       if(souAdmin){
+        await carregarCatalogoCompleto();
         ativarModoAdmin();
         mostrarCatalogo();
       } else {
         const pago = await verificarPago(user.id);
         if(pago){
+          await carregarCatalogoCompleto();
           mostrarCatalogo();
         } else {
           iniciarCheckoutStripe();
@@ -1526,11 +1553,12 @@ document.getElementById('btnSalvarNovaSenha').addEventListener('click', async ()
     if(user){
       const souAdmin = await verificarAdmin(user.id);
       if(souAdmin){
+        await carregarCatalogoCompleto();
         ativarModoAdmin();
         mostrarCatalogo();
       } else {
         const pago = await verificarPago(user.id);
-        if(pago){ mostrarCatalogo(); } else { iniciarCheckoutStripe(); }
+        if(pago){ await carregarCatalogoCompleto(); mostrarCatalogo(); } else { iniciarCheckoutStripe(); }
       }
     }
   }catch(e){
@@ -1597,8 +1625,12 @@ async function carregarPreviaLanding(){
       document.querySelector('.landing-previa-titulo').style.display = 'none';
       return;
     }
-    grid.innerHTML = data.map(l => `
-      <div class="previa-item"><img src="${l.imagem_url}" alt="${l.titulo}"></div>
+    const comUrls = await Promise.all(data.map(async l => ({
+      titulo: l.titulo,
+      url: await gerarUrlAssinada(l.imagem_url)
+    })));
+    grid.innerHTML = comUrls.filter(l => l.url).map(l => `
+      <div class="previa-item"><img src="${l.url}" alt="${l.titulo}"></div>
     `).join('');
   }catch(e){
     console.error('Erro ao carregar prévia da landing:', formatarErro(e));
@@ -1609,14 +1641,19 @@ async function carregarPreviaLanding(){
 // ==========================================================================
 // INICIALIZAÇÃO
 // ==========================================================================
-async function init(){
-  renderChips();
-  popularFormAdmin();
+
+// busca o catálogo completo (só funciona se admin ou pagante, por causa do RLS) e exibe
+async function carregarCatalogoCompleto(){
   looksReaisSalvos = await carregarLooksReais();
   rebuildLooks();
   render();
   renderSavedList();
-  carregarPreviaLanding();
+}
+
+async function init(){
+  renderChips();
+  popularFormAdmin();
+  await carregarPreviaLanding(); // só as fotos de destaque — visível pra qualquer visitante
 
   mostrarLanding(); // estado padrão enquanto verifica a sessão
 
@@ -1625,11 +1662,13 @@ async function init(){
     if(user){
       const souAdmin = await verificarAdmin(user.id);
       if(souAdmin){
+        await carregarCatalogoCompleto();
         ativarModoAdmin();
         mostrarCatalogo();
       } else {
         const pago = await verificarPago(user.id);
         if(pago){
+          await carregarCatalogoCompleto();
           mostrarCatalogo();
         } else if(new URLSearchParams(window.location.search).get('pago') === 'sucesso'){
           // acabou de voltar do Stripe — o webhook pode levar alguns segundos pra confirmar,
@@ -1637,7 +1676,7 @@ async function init(){
           for(let tentativa=0; tentativa<5; tentativa++){
             await new Promise(res=>setTimeout(res, 1500));
             const pagoAgora = await verificarPago(user.id);
-            if(pagoAgora){ mostrarCatalogo(); break; }
+            if(pagoAgora){ await carregarCatalogoCompleto(); mostrarCatalogo(); break; }
           }
         }
       }
