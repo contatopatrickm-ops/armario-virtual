@@ -113,11 +113,50 @@
     width:100%; height:100%; object-fit:cover; display:block; filter:brightness(0.9);
   }
   .landing-cta-nota{
-    margin-top:10px; font-size:12px; color:var(--text-tertiary); font-family:'JetBrains Mono', monospace;
+    margin-top:12px; font-size:14px; color:var(--text-secondary); font-family:'JetBrains Mono', monospace;
   }
   @media (max-width:520px){
     .landing-previa-grid{grid-template-columns:repeat(3, 1fr); gap:8px;}
   }
+
+  /* ---------- LANDING: COMO VOCÊ RECEBE O ACESSO ---------- */
+  .landing-acesso-box{
+    border:1px solid var(--border); border-radius:12px; background:var(--bg-card);
+    padding:20px 22px; margin:0 0 30px;
+  }
+  .landing-acesso-titulo{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--accent-bright); margin:0 0 12px;
+  }
+  .landing-acesso-lista{list-style:none; display:flex; flex-direction:column; gap:9px;}
+  .landing-acesso-lista li{
+    font-size:14px; color:var(--text-secondary); display:flex; align-items:flex-start; gap:9px; line-height:1.45;
+  }
+  .landing-acesso-lista li b{color:var(--text-primary); font-weight:600;}
+  .landing-acesso-lista .icone-ok{color:var(--accent-bright); font-size:14px; margin-top:1px; flex-shrink:0;}
+  .landing-acesso-naoe{
+    margin-top:12px; padding-top:12px; border-top:1px solid var(--border);
+    font-size:12.5px; color:var(--text-tertiary);
+  }
+
+  /* ---------- LANDING: DEMO DE FILTROS ---------- */
+  .landing-demo-titulo{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--text-tertiary); margin:0 0 4px;
+  }
+  .landing-demo-sub{font-size:13px; color:var(--text-tertiary); margin:0 0 16px;}
+  .landing-demo-box{
+    border:1px solid var(--border); border-radius:12px; background:var(--bg-elevated);
+    padding:18px 20px 20px;
+  }
+  .landing-demo-box .filter-group{margin-bottom:14px;}
+  .landing-demo-box .filter-group:last-child{margin-bottom:0;}
+  .landing-demo-resultado{
+    margin-top:16px; padding-top:16px; border-top:1px solid var(--border);
+    font-size:12px; color:var(--text-tertiary); font-family:'JetBrains Mono', monospace;
+  }
+  .previa-item{transition:opacity .2s, filter .2s;}
+  .previa-item.previa-esmaecido{opacity:0.25; filter:grayscale(1);}
 
   /* ---------- FILTER BAR ---------- */
   .filter-bar{
@@ -589,7 +628,7 @@
       <div class="logo-signature">por Patrick Muñoz</div>
     </div>
     <div class="nav-right">
-      <button class="btn-entrar" id="btnEntrarLanding" type="button">Entrar</button>
+      <button class="btn-entrar" id="btnEntrarLanding" type="button">Fazer login</button>
     </div>
   </nav>
 
@@ -604,14 +643,44 @@
     <div class="landing-previa-grid" id="landingPreviaGrid"></div>
   </section>
 
-  <section style="padding:10px 5vw 90px; max-width:640px;">
-    <ul class="checkout-features" style="border:none; margin-bottom:32px;">
-      <li>Um look pronto pra cada ocasião — trabalho, encontro, jantar, viagem</li>
-      <li>Filtros por ocasião, estação, temperatura e período</li>
-      <li>Curadoria feita por um consultor de imagem, não um algoritmo genérico</li>
-      <li>Pague uma vez, use pra sempre — acesso vitalício</li>
-    </ul>
-    <button class="btn-primary" id="btnEntrarHero" type="button">Quero ter acesso — R$ 19,90</button>
+  <section style="padding:26px 5vw 6px; max-width:820px;">
+    <div class="landing-demo-titulo">Veja como funciona a busca</div>
+    <div class="landing-demo-sub">Clique nos filtros abaixo — é exatamente assim que você encontra o look certo lá dentro, em segundos.</div>
+    <div class="landing-demo-box">
+      <div class="filter-group">
+        <span class="filter-label">Ocasião</span>
+        <div class="chip-row" id="landingOcasiaoChips"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Estação</span>
+        <div class="chip-row" id="landingEstacaoChips"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Temperatura</span>
+        <div class="chip-row" id="landingTemperaturaChips"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Período</span>
+        <div class="chip-row" id="landingPeriodoChips"></div>
+      </div>
+      <div class="landing-demo-resultado" id="landingDemoResultado">Todos os filtros do catálogo completo — experimente combinar alguns.</div>
+    </div>
+  </section>
+
+  <section style="padding:30px 5vw 10px; max-width:640px;">
+    <div class="landing-acesso-box">
+      <div class="landing-acesso-titulo">Como você recebe o acesso</div>
+      <ul class="landing-acesso-lista">
+        <li><span class="icone-ok">✓</span> <span>É tudo <b>direto neste site</b> — você faz login aqui mesmo e o catálogo abre na hora.</span></li>
+        <li><span class="icone-ok">✓</span> <span>Sem PDF pra baixar, sem arquivo enviado por e-mail.</span></li>
+        <li><span class="icone-ok">✓</span> <span>Sem WhatsApp, sem grupo, sem precisar acessar outra plataforma.</span></li>
+        <li><span class="icone-ok">✓</span> <span>Acesso vitalício — depois de pagar, você entra com seu e-mail e senha sempre que quiser, pra sempre.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section style="padding:0 5vw 90px; max-width:640px;">
+    <button class="btn-primary" id="btnEntrarHero" type="button">Quero ter acesso ao catálogo completo — R$ 19,90</button>
     <div class="landing-cta-nota">Pagamento único · acesso vitalício — sem mensalidade</div>
   </section>
 
@@ -1610,13 +1679,15 @@ document.getElementById('checkoutOverlay').addEventListener('click', (e)=>{
 // ==========================================================================
 // PRÉVIA DE FOTOS NA LANDING PAGE
 // ==========================================================================
+let previaLandingLooks = [];
+
 async function carregarPreviaLanding(){
   const grid = document.getElementById('landingPreviaGrid');
   if(!supabaseClient) return;
   try{
     const { data, error } = await supabaseClient
       .from('looks')
-      .select('titulo, imagem_url')
+      .select('titulo, imagem_url, ocasioes, estacoes, temperaturas, periodos')
       .eq('destaque', true)
       .order('criado_em', { ascending: false })
       .limit(3);
@@ -1627,16 +1698,79 @@ async function carregarPreviaLanding(){
     }
     const comUrls = await Promise.all(data.map(async l => ({
       titulo: l.titulo,
-      url: await gerarUrlAssinada(l.imagem_url)
+      url: await gerarUrlAssinada(l.imagem_url),
+      ocasioes: l.ocasioes || [],
+      estacoes: l.estacoes || [],
+      temperaturas: l.temperaturas || [],
+      periodos: l.periodos || []
     })));
-    grid.innerHTML = comUrls.filter(l => l.url).map(l => `
-      <div class="previa-item"><img src="${l.url}" alt="${l.titulo}"></div>
+    previaLandingLooks = comUrls.filter(l => l.url);
+    grid.innerHTML = previaLandingLooks.map((l, idx) => `
+      <div class="previa-item" data-idx="${idx}"><img src="${l.url}" alt="${l.titulo}"></div>
     `).join('');
   }catch(e){
     console.error('Erro ao carregar prévia da landing:', formatarErro(e));
     document.querySelector('.landing-previa-titulo').style.display = 'none';
   }
 }
+
+// ---- demonstração de filtros na landing page (não exige login/pagamento) ----
+const landingDemoState = { ocasiao:new Set(), estacao:new Set(), temperatura:new Set(), periodo:new Set() };
+
+function montarChipsLanding(){
+  const mapa = [
+    { id:'landingOcasiaoChips', valores: OCASIOES.map(o=>({value:o, label:o})), set: landingDemoState.ocasiao },
+    { id:'landingEstacaoChips', valores: ESTACOES.map(e=>({value:e.id, label:e.label})), set: landingDemoState.estacao },
+    { id:'landingTemperaturaChips', valores: TEMPERATURAS.map(t=>({value:t, label:t})), set: landingDemoState.temperatura },
+    { id:'landingPeriodoChips', valores: PERIODOS.map(p=>({value:p, label:p})), set: landingDemoState.periodo }
+  ];
+  mapa.forEach(grupo=>{
+    const wrap = document.getElementById(grupo.id);
+    if(!wrap) return;
+    wrap.innerHTML = grupo.valores.map(v=>`<button class="chip" data-value="${v.value}">${v.label}</button>`).join('');
+    wrap.querySelectorAll('.chip').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const v = el.dataset.value;
+        grupo.set.has(v) ? grupo.set.delete(v) : grupo.set.add(v);
+        el.classList.toggle('active');
+        aplicarFiltroDemoLanding();
+      });
+    });
+  });
+}
+
+function aplicarFiltroDemoLanding(){
+  const nenhumFiltro = !landingDemoState.ocasiao.size && !landingDemoState.estacao.size
+    && !landingDemoState.temperatura.size && !landingDemoState.periodo.size;
+  const resultadoEl = document.getElementById('landingDemoResultado');
+  const itens = document.querySelectorAll('#landingPreviaGrid .previa-item');
+
+  if(nenhumFiltro){
+    itens.forEach(el=>el.classList.remove('previa-esmaecido'));
+    if(resultadoEl) resultadoEl.textContent = 'Todos os filtros do catálogo completo — experimente combinar alguns.';
+    return;
+  }
+
+  let combina = 0;
+  itens.forEach(el=>{
+    const idx = Number(el.dataset.idx);
+    const look = previaLandingLooks[idx];
+    if(!look){ el.classList.add('previa-esmaecido'); return; }
+    const ok =
+      (!landingDemoState.ocasiao.size || look.ocasioes.some(o=>landingDemoState.ocasiao.has(o))) &&
+      (!landingDemoState.estacao.size || look.estacoes.some(e=>landingDemoState.estacao.has(e))) &&
+      (!landingDemoState.temperatura.size || look.temperaturas.some(t=>landingDemoState.temperatura.has(t))) &&
+      (!landingDemoState.periodo.size || look.periodos.some(p=>landingDemoState.periodo.has(p)));
+    el.classList.toggle('previa-esmaecido', !ok);
+    if(ok) combina++;
+  });
+
+  resultadoEl.textContent = combina > 0
+    ? `${combina} dess${combina===1?'a prévia':'as prévias'} combina${combina===1?'':'m'} com esse filtro — no catálogo completo são dezenas de opções assim.`
+    : 'Nenhuma dessas 3 fotos de prévia combina com essa combinação — mas no catálogo completo tem opção pra isso.';
+}
+
+montarChipsLanding();
 
 // ==========================================================================
 // INICIALIZAÇÃO
