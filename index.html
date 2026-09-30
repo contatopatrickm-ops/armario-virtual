@@ -1691,7 +1691,7 @@ async function carregarPreviaLanding(){
       .select('titulo, imagem_url, ocasioes, estacoes, temperaturas, periodos')
       .eq('destaque', true)
       .order('criado_em', { ascending: false })
-      .limit(6);
+      .limit(9);
     if(error) throw error;
     if(!data || data.length === 0){
       document.querySelector('.landing-previa-titulo').style.display = 'none';
