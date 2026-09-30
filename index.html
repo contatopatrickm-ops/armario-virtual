@@ -113,8 +113,9 @@
     width:100%; height:100%; object-fit:cover; display:block; filter:brightness(0.9);
   }
   .landing-cta-nota{
-    margin-top:12px; font-size:14px; color:var(--accent-bright); font-family:'JetBrains Mono', monospace;
+    margin-top:12px; font-size:14px; color:#fff; font-family:'JetBrains Mono', monospace;
   }
+  .landing-cta-nota .destaque-amarelo{color:var(--accent-bright);}
   @media (max-width:520px){
     .landing-previa-grid{grid-template-columns:repeat(3, 1fr); gap:8px;}
   }
@@ -141,8 +142,8 @@
 
   /* ---------- LANDING: DEMO DE FILTROS ---------- */
   .landing-demo-titulo{
-    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
-    color:var(--text-tertiary); margin:0 0 4px;
+    font-family:'Inter', sans-serif; font-size:20px; font-weight:700; letter-spacing:normal; text-transform:none;
+    color:var(--text-primary); margin:0 0 4px;
   }
   .landing-demo-sub{font-size:13px; color:var(--text-tertiary); margin:0 0 16px;}
   .landing-demo-box{
@@ -681,7 +682,7 @@
 
   <section style="padding:0 5vw 90px; max-width:640px;">
     <button class="btn-primary" id="btnEntrarHero" type="button">Quero ter acesso ao catálogo completo — R$ 19,90</button>
-    <div class="landing-cta-nota">Pagamento único · acesso vitalício — sem mensalidade</div>
+    <div class="landing-cta-nota"><span class="destaque-amarelo">Pagamento único</span> · acesso vitalício — sem mensalidade</div>
   </section>
 
   <footer>
